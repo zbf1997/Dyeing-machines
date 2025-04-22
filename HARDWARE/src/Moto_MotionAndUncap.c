@@ -608,7 +608,7 @@ void WaitMotoStop(u8 SlaveAddress,u16 reg,u16 num)
         {
             MODH_WriteOrReadParam(3,SlaveAddress,LSMotoStatus,0,2,NULL,MODH_CmdMutex);
             MODH_WriteOrReadParam(3,SlaveAddress,LSMotoLocation,0,2,NULL,MODH_CmdMutex);
-            #if 1
+            #if 0
             if (SlaveAddress==1)
             {
                 printf("X1电机运行，当前位置为：%d\r\n",MotoLocation[SlaveAddress-1]); 
@@ -645,7 +645,7 @@ void WaitMotoStop(u8 SlaveAddress,u16 reg,u16 num)
         }
         else
         {
-            #if 1
+            #if 0
             if (SlaveAddress==1)
             {
                 printf("X1电机停止\r\n");
@@ -1027,7 +1027,7 @@ void MODH_WriteOrReadParam(uint8_t WriteOrRead, uint8_t SlaveAddr, uint16_t _reg
         taskENTER_CRITICAL();
         MODH_CmdMutexOwnership = xTaskGetCurrentTaskHandle();//记录互斥信号所有者，在挂起或删除任务时，释放信号量
         taskEXIT_CRITICAL();
-        vTaskDelay(delaytime);
+        vTaskDelay(delaytime);//在MODBUS读写函数内延迟而不是在函数外延迟，防止实际任务切换时导致数据帧没有被时间分割，例如任务A使用完MODBUS发数据后，任务调度器切换到任务B，任务B之前的延时等待刚好到了，使用MODBUS发数据，这是数据A和数据B会接在一起，使得数据帧没被分割，导致MODBUS数据帧错误
 
         if(WriteOrRead==3)
         {
@@ -1045,6 +1045,11 @@ void MODH_WriteOrReadParam(uint8_t WriteOrRead, uint8_t SlaveAddr, uint16_t _reg
         MODH_CmdMutexOwnership = NULL;  // 记录所有者
         taskEXIT_CRITICAL();
         xSemaphoreGive(SemaHandle); /* 释放互斥信号量 */
+        if(ulTaskNotifyTake(pdTRUE, 0)== pdTRUE)//收到MonitorTasks通知，则回复MonitorTasks
+        {
+            xTaskNotifyGive(MonitorTasks_Handler); // 发送通知
+        }
+        
         vTaskDelay(10);
     }
     else

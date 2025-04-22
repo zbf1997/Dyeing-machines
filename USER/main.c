@@ -224,7 +224,7 @@ void MotoStausCheck(void *pvParameters)
   
         if (xTaskGetTickCount() - xLastTime > pdMS_TO_TICKS(20000)) {  // 每5秒执行一次  
             char pcBuffer[1000];  
-            vTaskList(pcBuffer);  // 生成任务状态表格?:ml-citation{ref="3,5" data="citationList"}  
+            vTaskList(pcBuffer);  // 生成任务状态表格
             printf("任务状态:\n%s\n", pcBuffer);  
             xLastTime = xTaskGetTickCount();  
         } 
@@ -234,18 +234,24 @@ void MotoStausCheck(void *pvParameters)
 void MonitorTasks(void *pvParameters)
 {
     u8 str[20];
+    UBaseType_t uxOriginalPriority = uxTaskPriorityGet(NULL); // 获取当前任务的优先级
 	while(1)
 	{
-        if (xSemaphoreTake(MotoMonitBianry,portTICK_RATE_MS) == pdTRUE)
+        if (xSemaphoreTake(MotoMonitBianry,portMAX_DELAY) == pdTRUE)
         {
+            printf("进入监控任务\r\n");
+            vTaskPrioritySet(NULL, moto_TASK_PRIO + 1); // 提高当前任务的优先级
             //检测标志变量的值
             if (MotoTaskFlag == 2)// 挂起任务（如果未挂起） 
             {
                 MotoTaskFlag =0;
-                if (eTaskGetState(moto_Task_Handler)!= eSuspended)
+                if (moto_Task_Handler != NULL && eTaskGetState(moto_Task_Handler) != eDeleted)
                 {
-                    while(MODH_CmdMutexOwnership==moto_Task_Handler);//如果互斥信号量被当前任务持有，需要先释放掉，避免死锁
+                    printf("进入挂起\r\n");
+                    xTaskNotifyGive(moto_Task_Handler);
+                    ulTaskNotifyTake(pdTRUE, portMAX_DELAY);// 等待MODH_WriteOrReadParam函数释放信号量完成后的通知
                     vTaskSuspend(moto_Task_Handler);
+                    printf("挂起完成\r\n");
                 }
             } 
             if (MotoTaskFlag == 1)// 恢复任务（如果已挂起） 
@@ -253,7 +259,9 @@ void MonitorTasks(void *pvParameters)
                 MotoTaskFlag =0;
                 if (eTaskGetState(moto_Task_Handler) == eSuspended) 
                 {
+                    printf("进入恢复\r\n");
                     vTaskResume(moto_Task_Handler);
+                    printf("恢复完成\r\n");
                 }
             }
             if (MotoTaskFlag == 3)// 重启任务 
@@ -261,6 +269,9 @@ void MonitorTasks(void *pvParameters)
                 MotoTaskFlag =0;
                 if (moto_Task_Handler != NULL) 
                 {
+                    printf("进入重启\r\n");
+                    xTaskNotifyGive(moto_Task_Handler);
+                    ulTaskNotifyTake(pdTRUE, portMAX_DELAY); //等待释放信号量完成
                     vTaskDelete(moto_Task_Handler);
                     moto_Task_Handler = NULL;
                 }
@@ -272,6 +283,7 @@ void MonitorTasks(void *pvParameters)
                     (void*          )NULL,
                     (UBaseType_t    )moto_TASK_PRIO,
                     (TaskHandle_t*  )&moto_Task_Handler);
+                    printf("重启完成\r\n");
             }
 
             if (MotoTaskFlag == 4)// 终止任务 
@@ -279,13 +291,16 @@ void MonitorTasks(void *pvParameters)
                 MotoTaskFlag =0;
                 if (moto_Task_Handler != NULL) 
                 {
-                    while(MODH_CmdMutexOwnership==moto_Task_Handler);//如果互斥信号量被当前任务持有，需要先释放掉，避免死锁
+                    printf("进入终止\r\n");
+                    xTaskNotifyGive(moto_Task_Handler);
+                    ulTaskNotifyTake(pdTRUE, portMAX_DELAY);// 等待释放信号量完成
                     vTaskDelete(moto_Task_Handler); // 删除指定任务
+                    printf("已终止任务\r\n");
                     moto_Task_Handler = NULL;
                 }
             }
+            vTaskPrioritySet(NULL, uxOriginalPriority); // 恢复原优先级
         }
-        delay_ms(200);
     }
 }
 
