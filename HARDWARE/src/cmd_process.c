@@ -302,7 +302,7 @@ void NotifyButton(uint16 screen_id, uint16 control_id, uint8  state)
         switch (control_id)
         {
             case 9://按下X3电机运行按钮
-
+            ucg_X3Y3Z3A3RunBtn=1;
                 break;
             case 21://按下Y3电机运行按钮
 
@@ -314,6 +314,7 @@ void NotifyButton(uint16 screen_id, uint16 control_id, uint8  state)
 
                 break;
             case 11://按下X3电机保存按钮
+                ucg_X3Y3Z3A3StopBtn=1;
                 break;
             case 23://按下Y3电机保存按钮
                 break;
@@ -1794,6 +1795,26 @@ void Him_Init()
     ucg_A2MotoModBuf[15]=GET_BYTE0(A2MotoCurrent);
     ucg_A2MotoModBuf[16]=GET_BYTE1(A2MotoRunMode);
     ucg_A2MotoModBuf[17]=GET_BYTE0(A2MotoRunMode);
+    
+    ucg_X3MotoModBuf[0]=GET_BYTE3(X3MotoMaxStep);
+    ucg_X3MotoModBuf[1]=GET_BYTE2(X3MotoMaxStep);
+    ucg_X3MotoModBuf[2]=GET_BYTE1(X3MotoMaxStep);
+    ucg_X3MotoModBuf[3]=GET_BYTE0(X3MotoMaxStep);
+    ucg_X3MotoModBuf[4]=GET_BYTE3(X3MotoSingleStep);
+    ucg_X3MotoModBuf[5]=GET_BYTE2(X3MotoSingleStep);
+    ucg_X3MotoModBuf[6]=GET_BYTE1(X3MotoSingleStep);
+    ucg_X3MotoModBuf[7]=GET_BYTE0(X3MotoSingleStep);
+    ucg_X3MotoModBuf[8]=GET_BYTE1(X3MotoAcc);
+    ucg_X3MotoModBuf[9]=GET_BYTE0(X3MotoAcc);
+    ucg_X3MotoModBuf[10]=GET_BYTE1(X3MotoDec);
+    ucg_X3MotoModBuf[11]=GET_BYTE0(X3MotoDec);
+    ucg_X3MotoModBuf[12]=GET_BYTE1(X3MotoSpeed);
+    ucg_X3MotoModBuf[13]=GET_BYTE0(X3MotoSpeed);
+    ucg_X3MotoModBuf[14]=GET_BYTE1(X3MotoCurrent);
+    ucg_X3MotoModBuf[15]=GET_BYTE0(X3MotoCurrent);
+    ucg_X3MotoModBuf[16]=GET_BYTE1(X3MotoRunMode);
+    ucg_X3MotoModBuf[17]=GET_BYTE0(X3MotoRunMode);
+
     for (j = 0; j <=220; j++)//将flash中的数据显示到串口屏
 	{
         if(j==0)

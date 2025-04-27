@@ -354,6 +354,37 @@ void  moto_task(void *pvParameters)
             // bsp_SetUsart2Baud(uwg_NewUsart2Baund);
             ucg_BaundSlaveAddressSetBtn=0;
         }
+        if(ucg_X3Y3Z3A3RunBtn==1)
+        {
+            ucg_X3Y3Z3A3RunBtn=0;
+            X3MotoRunMode=7;//永动模式
+            ucg_X3MotoModBuf[16]=GET_BYTE1(X3MotoRunMode);
+            ucg_X3MotoModBuf[17]=GET_BYTE0(X3MotoRunMode);
+            delay_ms(500);
+            MODH_WriteOrReadParam(10,11,0,0,9,ucg_X3MotoModBuf,MODH_CmdMutex);//写入X3电机行程，单次步数，加速度，减速度，速度，电流，运行模式
+            delay_ms(500);
+            MODH_WriteOrReadParam(10,11,0x0C,0,9,ucg_X3MotoModBuf,MODH_CmdMutex);//写入Y3电机行程，单次步数，加速度，减速度，速度，电流，运行模式
+            delay_ms(500);
+            MODH_WriteOrReadParam(10,11,0x18,0,9,ucg_X3MotoModBuf,MODH_CmdMutex);//写入Z3电机行程，单次步数，加速度，减速度，速度，电流，运行模式
+            delay_ms(500);
+            MODH_WriteOrReadParam(10,11,0x24,0,9,ucg_X3MotoModBuf,MODH_CmdMutex);//写入A3电机行程，单次步数，加速度，减速度，速度，电流，运行模式
+            
+        }
+        if(ucg_X3Y3Z3A3StopBtn==1)
+        {
+            ucg_X3Y3Z3A3StopBtn=0;
+            X3MotoRunMode=4;//停机
+            ucg_X3MotoModBuf[16]=GET_BYTE1(X3MotoRunMode);
+            ucg_X3MotoModBuf[17]=GET_BYTE0(X3MotoRunMode);
+            delay_ms(500);
+            MODH_WriteOrReadParam(10,11,0,0,9,ucg_X3MotoModBuf,MODH_CmdMutex);//X3停机
+            delay_ms(500);
+            MODH_WriteOrReadParam(10,11,0x0C,0,9,ucg_X3MotoModBuf,MODH_CmdMutex);
+            delay_ms(500);
+            MODH_WriteOrReadParam(10,11,0x18,0,9,ucg_X3MotoModBuf,MODH_CmdMutex);
+            delay_ms(500);
+            MODH_WriteOrReadParam(10,11,0x24,0,9,ucg_X3MotoModBuf,MODH_CmdMutex);
+        }
         vTaskDelay(200/portTICK_RATE_MS);
     }
 }
@@ -537,8 +568,8 @@ void UpDownCap(u8 Dir,u8 StainingNumber)
 *********************************************************************************************************/
 void TakeGetSample(u8 Dir,u8 StainingNumber,u8 ShakeWaterFlag,u16 millisecond)
 {
-    
     X1Y1MotoMove(StainingNumber);
+    //MotoShakeWaterInit(ZstepShakeinterval,Z1ShakeSpeed,Z1ShakeAcc,Z1ShakeDec);
     if(Dir==1)
     {
         if(StainingPodStatus[StainingNumber]==1)//仓内有样品，可以取出
@@ -880,8 +911,8 @@ void MotoShakeWaterInit(u16 ZstepShakeinterval,u16 Z1ShakeSpeed,u16 Z1ShakeAcc,u
     MODH_WriteOrReadParam(6,3,0x6221,GET_2BYTE_H(ZstepShakeinterval),0,NULL,MODH_CmdMutex);//设定PR4位置高位
     MODH_WriteOrReadParam(6,3,0x6222,GET_2BYTE_L(ZstepShakeinterval),0,NULL,MODH_CmdMutex);//设定PR4位置低位
     MODH_WriteOrReadParam(6,3,0x6223,Z1ShakeSpeed,0,NULL,MODH_CmdMutex);//设定PR4速度 rpm
-    MODH_WriteOrReadParam(6,3,0x6224,Z1ShakeAcc,0,NULL,MODH_CmdMutex);//设定PR4加速度 ms/Krpm
-    MODH_WriteOrReadParam(6,3,0x6225,Z1ShakeDec,0,NULL,MODH_CmdMutex);//设定PR4减速度 ms/Krpm
+    MODH_WriteOrReadParam(6,3,0x6224,Z1ShakeDec,0,NULL,MODH_CmdMutex);//设定PR4加速度 ms/Krpm
+    MODH_WriteOrReadParam(6,3,0x6225,Z1ShakeAcc,0,NULL,MODH_CmdMutex);//设定PR4减速度 ms/Krpm
     MODH_WriteOrReadParam(6,3,0x6226,Z1ShakeStop,0,NULL,MODH_CmdMutex);//设定PR4停顿时间ms
 }
 void MotoBasketCapInit()//初始化取放吊篮和开关盖路径
@@ -1010,14 +1041,14 @@ void ShakeWater(u32 ShakeTime)
 *	          SlaveAddr : 从机地址
 *	          _reg : 寄存器地址
 *	          _value : 写入的值
-*	          _num : 读取的个数
+*	          _num : 读取或写入的寄存器个数
 *             *_buf：写入的数组
 *             SemaHandle：互斥信号量句柄
 *	返 回 值: 无
 *********************************************************************************************************/
 void MODH_WriteOrReadParam(uint8_t WriteOrRead, uint8_t SlaveAddr, uint16_t _reg, uint16_t _value,uint16_t _num,uint8_t *_buf,SemaphoreHandle_t SemaHandle)
 {
-    u8 delaytime=50;
+    u8 delaytime=60;
     BaseType_t xReturn = pdFALSE;
     
     xReturn = xSemaphoreTake(SemaHandle,portMAX_DELAY); /* 获取互斥信号量 */
@@ -1063,67 +1094,67 @@ void testliucheng()
     {
         StainingPodStatus[29]=1;//假设输入仓有样品
         TakeGetSample(1,29,0,0);
-        TakeGetSample(2,28,1,2000);
-        TakeGetSample(1,28,1,2000);
-        TakeGetSample(2,0,1,2000);
-        TakeGetSample(1,0,1,2000);
-        TakeGetSample(2,27,1,2000);
-        TakeGetSample(1,27,1,2000);
-        TakeGetSample(2,1,1,2000);
-        TakeGetSample(1,1,1,2000);
-        TakeGetSample(2,26,1,2000);
-        TakeGetSample(1,26,1,2000);
-        TakeGetSample(2,2,1,2000);
-        TakeGetSample(1,2,1,2000);
-        TakeGetSample(2,25,1,2000);
-        TakeGetSample(1,25,1,2000);
-        TakeGetSample(2,3,1,2000);
-        TakeGetSample(1,3,1,2000);
-        TakeGetSample(2,24,1,2000);
-        TakeGetSample(1,24,1,2000);
-        TakeGetSample(2,4,1,2000);
-        TakeGetSample(1,4,1,2000);
-        TakeGetSample(2,23,1,2000);
-        TakeGetSample(1,23,1,2000);
-        TakeGetSample(2,5,1,2000);
-        TakeGetSample(1,5,1,2000);
-        TakeGetSample(2,22,1,2000);
-        TakeGetSample(1,22,1,2000);
-        TakeGetSample(2,6,1,2000);
-        TakeGetSample(1,6,1,2000);
-        TakeGetSample(2,21,1,2000);
-        TakeGetSample(1,21,1,2000);
-        TakeGetSample(2,7,1,2000);
-        TakeGetSample(1,7,1,2000);
-        TakeGetSample(2,20,1,2000);
-        TakeGetSample(1,20,1,2000);
-        TakeGetSample(2,8,1,2000);
-        TakeGetSample(1,8,1,2000);
-        TakeGetSample(2,19,1,2000);
-        TakeGetSample(1,19,1,2000);
-        TakeGetSample(2,9,1,2000);
-        TakeGetSample(1,9,1,2000);
-        TakeGetSample(2,18,1,2000);
-        TakeGetSample(1,18,1,2000);
-        TakeGetSample(2,10,1,2000);
-        TakeGetSample(1,10,1,2000);
-        TakeGetSample(2,17,1,2000);
-        TakeGetSample(1,17,1,2000);
-        TakeGetSample(2,11,1,2000);
-        TakeGetSample(1,11,1,2000);
-        TakeGetSample(2,16,1,2000);
-        TakeGetSample(1,16,1,2000);
-        TakeGetSample(2,12,1,2000);
-        TakeGetSample(1,12,1,2000);
-        TakeGetSample(2,15,1,2000);
-        TakeGetSample(1,15,1,2000);
-        TakeGetSample(2,13,1,2000);
-        TakeGetSample(1,13,1,2000);
-        TakeGetSample(2,14,1,2000);
-        TakeGetSample(1,14,1,2000);
-        TakeGetSample(2,32,1,2000);
-        TakeGetSample(1,32,0,2000);
-        TakeGetSample(2,29,1,2000);
+        //TakeGetSample(2,28,1,Z1Shaketime);
+        //TakeGetSample(1,28,1,Z1Shaketime);
+        TakeGetSample(2,0,1,Z1Shaketime);
+        TakeGetSample(1,0,1,Z1Shaketime);
+        //TakeGetSample(2,27,1,Z1Shaketime);
+        //TakeGetSample(1,27,1,Z1Shaketime);
+        TakeGetSample(2,1,1,Z1Shaketime);
+        TakeGetSample(1,1,1,Z1Shaketime);
+        //TakeGetSample(2,26,1,Z1Shaketime);
+        //TakeGetSample(1,26,1,Z1Shaketime);
+        TakeGetSample(2,2,1,Z1Shaketime);
+        TakeGetSample(1,2,1,Z1Shaketime);
+        TakeGetSample(2,25,1,Z1Shaketime);
+        TakeGetSample(1,25,1,Z1Shaketime);
+        TakeGetSample(2,3,1,Z1Shaketime);
+        TakeGetSample(1,3,1,Z1Shaketime);
+        TakeGetSample(2,24,1,Z1Shaketime);
+        TakeGetSample(1,24,1,Z1Shaketime);
+        TakeGetSample(2,4,1,Z1Shaketime);
+        TakeGetSample(1,4,1,Z1Shaketime);
+        TakeGetSample(2,23,1,Z1Shaketime);
+        TakeGetSample(1,23,1,Z1Shaketime);
+        TakeGetSample(2,5,1,Z1Shaketime);
+        TakeGetSample(1,5,1,Z1Shaketime);
+        TakeGetSample(2,22,1,Z1Shaketime);
+        TakeGetSample(1,22,1,Z1Shaketime);
+        TakeGetSample(2,6,1,Z1Shaketime);
+        TakeGetSample(1,6,1,Z1Shaketime);
+        TakeGetSample(2,21,1,Z1Shaketime);
+        TakeGetSample(1,21,1,Z1Shaketime);
+        TakeGetSample(2,7,1,Z1Shaketime);
+        TakeGetSample(1,7,1,Z1Shaketime);
+        TakeGetSample(2,20,1,Z1Shaketime);
+        TakeGetSample(1,20,1,Z1Shaketime);
+        TakeGetSample(2,8,1,Z1Shaketime);
+        TakeGetSample(1,8,1,Z1Shaketime);
+        TakeGetSample(2,19,1,Z1Shaketime);
+        TakeGetSample(1,19,1,Z1Shaketime);
+        TakeGetSample(2,9,1,Z1Shaketime);
+        TakeGetSample(1,9,1,Z1Shaketime);
+        TakeGetSample(2,18,1,Z1Shaketime);
+        TakeGetSample(1,18,1,Z1Shaketime);
+        TakeGetSample(2,10,1,Z1Shaketime);
+        TakeGetSample(1,10,1,Z1Shaketime);
+        TakeGetSample(2,17,1,Z1Shaketime);
+        TakeGetSample(1,17,1,Z1Shaketime);
+        TakeGetSample(2,11,1,Z1Shaketime);
+        TakeGetSample(1,11,1,Z1Shaketime);
+        TakeGetSample(2,16,1,Z1Shaketime);
+        TakeGetSample(1,16,1,Z1Shaketime);
+        TakeGetSample(2,12,1,Z1Shaketime);
+        TakeGetSample(1,12,1,Z1Shaketime);
+        TakeGetSample(2,15,1,Z1Shaketime);
+        TakeGetSample(1,15,1,Z1Shaketime);
+        TakeGetSample(2,13,1,Z1Shaketime);
+        TakeGetSample(1,13,1,Z1Shaketime);
+        TakeGetSample(2,14,1,Z1Shaketime);
+        TakeGetSample(1,14,1,Z1Shaketime);
+        TakeGetSample(2,32,1,Z1Shaketime);
+        TakeGetSample(1,32,0,Z1Shaketime);
+        TakeGetSample(2,29,1,Z1Shaketime);
         X1Y1Z1GoHome();
         X2Y2Z2GoHome();
         WaitMotoStop(1,LSMotoStatus,2);

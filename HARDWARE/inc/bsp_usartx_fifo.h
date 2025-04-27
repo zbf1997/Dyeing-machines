@@ -66,7 +66,7 @@ typedef struct
 #endif
 
 #if USART2_FIFO_EN == 1
-	#define USART2_BAUD			                    115200
+	#define USART2_BAUD			                115200
 	#define USART2_TX_BUF_SIZE	                1*1024
 	#define USART2_RX_BUF_SIZE	                1*1024
 
