@@ -3,65 +3,31 @@
 #include "FreeRTOS.h"
 
 //任务句柄
-TaskHandle_t StartTask_Handler;
-TaskHandle_t Process_message_Handler;
-TaskHandle_t moto_Task_Handler;
-TaskHandle_t LED0Task_Handler;
-TaskHandle_t MotoStausCheckTask_Handler;
-TaskHandle_t MonitorTasks_Handler;
-TaskHandle_t InputOutSlic_Handler;
-TaskHandle_t shiyanlicuheng1_Handler;
-TaskHandle_t TempControl_Handler;
+TaskHandle_t StartTask_Handler,Process_message_Handler,moto_Task_Handler;
+TaskHandle_t LED0Task_Handler,MotoStausCheckTask_Handler,MonitorTasks_Handler;
+TaskHandle_t InputOutSlic_Handler, shiyanlicuheng1_Handler,TempControl_Handler;
 TaskHandle_t ValvePump_Handler;
 
-
-int32 X1MotoMaxStep=110000;int32 X1MotoSingleStep=5000;//最大行程，单次运行步数
-int32 Y1MotoMaxStep=35000;int32 Y1MotoSingleStep=5000;
-int32 Z1MotoMaxStep=3500;int32 Z1MotoSingleStep=5000;
-int32 A1MotoMaxStep=330000;int32 A1MotoSingleStep=2000;
-int32 X2MotoMaxStep=95000;int32 X2MotoSingleStep=5000;
-int32 Y2MotoMaxStep=8500;int32 Y2MotoSingleStep=1000;
-int32 Z2MotoMaxStep=125000;int32 Z2MotoSingleStep=1000;
-int32 A2MotoMaxStep=2000;int32 A2MotoSingleStep=2000;
-int32 X3MotoMaxStep=2000;int32 X3MotoSingleStep=2000;
-int32 Y3MotoMaxStep=2000;int32 Y3MotoSingleStep=2000;
-int32 Z3MotoMaxStep=2000;int32 Z3MotoSingleStep=2000;
-int32 A3MotoMaxStep=2000;int32 A3MotoSingleStep=2000;
-
-
-uint16 X1MotoAcc=3000;uint16 X1MotoDec=3000;uint16 X1MotoCurrent=3500;//加速度，减速度，电机电流
-uint16 Y1MotoAcc=1000;uint16 Y1MotoDec=1000;uint16 Y1MotoCurrent=3500;
-uint16 Z1MotoAcc=1000;uint16 Z1MotoDec=1000;uint16 Z1MotoCurrent=1500;
-uint16 A1MotoAcc=1000;uint16 A1MotoDec=1000;uint16 A1MotoCurrent=1000;
-uint16 X2MotoAcc=2000;uint16 X2MotoDec=2000;uint16 X2MotoCurrent=3500;
-uint16 Y2MotoAcc=1000;uint16 Y2MotoDec=1000;uint16 Y2MotoCurrent=600;
-uint16 Z2MotoAcc=500;uint16 Z2MotoDec=500;uint16 Z2MotoCurrent=600;
-uint16 A2MotoAcc=2000;uint16 A2MotoDec=2000;uint16 A2MotoCurrent=600;
-uint16 X3MotoAcc=1000;uint16 X3MotoDec=1000;uint16 X3MotoCurrent=600;
-uint16 Y3MotoAcc=1000;uint16 Y3MotoDec=1000;uint16 Y3MotoCurrent=600;
-uint16 Z3MotoAcc=1000;uint16 Z3MotoDec=1000;uint16 Z3MotoCurrent=600;
-uint16 A3MotoAcc=1000;uint16 A3MotoDec=1000;uint16 A3MotoCurrent=600;
-
-uint8 X1MotoStatus=0;uint16 X1MotoSpeed=800;uint8 X1MotoRunMode=2;//电机状态，运行速度，运行模式
-uint8 Y1MotoStatus=0;uint16 Y1MotoSpeed=300;uint8 Y1MotoRunMode=2; 
-uint8 Z1MotoStatus=0;uint16 Z1MotoSpeed=120;uint8 Z1MotoRunMode=2;
-uint8 A1MotoStatus=0;uint16 A1MotoSpeed=1000;uint8 A1MotoRunMode=2;
-uint8 X2MotoStatus=0;uint16 X2MotoSpeed=800;uint8 X2MotoRunMode=2;
-uint8 Y2MotoStatus=0;uint16 Y2MotoSpeed=100;uint8 Y2MotoRunMode=2; 
-uint8 Z2MotoStatus=0;uint16 Z2MotoSpeed=6000;uint8 Z2MotoRunMode=2;
-uint8 A2MotoStatus=0;uint16 A2MotoSpeed=60;uint8 A2MotoRunMode=2;
-uint8 X3MotoStatus=0;uint16 X3MotoSpeed=95;uint8 X3MotoRunMode=7;
-uint8 Y3MotoStatus=0;uint16 Y3MotoSpeed=95;uint8 Y3MotoRunMode=7; 
-uint8 Z3MotoStatus=0;uint16 Z3MotoSpeed=95;uint8 Z3MotoRunMode=7;
-uint8 A3MotoStatus=0;uint16 A3MotoSpeed=95;uint8 A3MotoRunMode=7;
+// 电机参数数组
+MotorParams AxisMotors[12] = {
+//MaxStep|SingleStep|Acc|Dec |Speed|Current|Mode|Status|Offset
+   {110000,  5000, 3000, 3000,  800,   35,  2,  0,  250},  // X1，雷赛驱动器电流单位为0.1A
+   { 35000,  5000, 1000, 1000,  300,   35,  2,  0,  220},  // Y1
+   {  3500,  5000, 1000, 1000,  120,   16,  2,  0,   20},  // Z1
+   {330000,  2000, 1000, 1000, 1000,    5,  2,  0,  500},  // A1
+   { 95000,  5000, 2000, 2000,  800,   35,  2,  0,  400},  // X2
+   {  8500,  1000, 1000, 1000,  100,    5,  2,  0,  250},  // Y2
+   {125000,  1000,  500,  500, 6000,    5,  2,  0,   50},  // Z2
+   {  2000,  2000, 2000, 2000,   60,    8,  2,  0,    0},  // A2
+   { 32000, 28800,  200,  200,   80, 1500,  7,  0,    0},  // X3，奥创控制板电流单位为mA
+   {200000, 20000, 1000, 1000,   95,  600,  7,  0,    0},  // Y3
+   {200000, 20000, 1000, 1000,   95,  600,  7,  0,    0},  // Z3
+   {200000, 20000, 1000, 1000,   95,  600,  7,  0,    0}   // A3
+};
 
 volatile uint16 ucg_Temp_ch1,MotoStatus[10];
 uint8  cmd_buffer[CMD_MAX_SIZE];
 volatile int32 MotoLocation[10];
-
-u8 ucg_X1MotoModBuf[30],ucg_Y1MotoModBuf[30],ucg_Z1MotoModBuf[30],ucg_A1MotoModBuf[30],//存储modbus传输数据,字节0-3存储最大行程，字节4-7运行步数，字节8-9加速度，字节10-11减速度，字节12-13运行速度，字节14-15电机电流，字节16-17运行模式
-   ucg_X2MotoModBuf[30],ucg_Y2MotoModBuf[30],ucg_Z2MotoModBuf[30],ucg_A2MotoModBuf[30],
-   ucg_X3MotoModBuf[30],ucg_Y3MotoModBuf[30],ucg_Z3MotoModBuf[30],ucg_A3MotoModBuf[30];
 
 u8 ucg_ValveModBuf[45][10];
 u8 ucg_X1MotoRun1Btn,ucg_Y1MotoRun1Btn,ucg_Z1MotoRun1Btn,ucg_A1MotoRunBtn,ucg_X1Y1Z1RunBtn,ucg_X1Y1Z1RstBtn,ucg_X1Y1Z1StopBtn,
@@ -78,17 +44,14 @@ uint8_t ucg_ValveSwitch[45],ucg_ValveDir[45],ucg_ValveRunBtn,ucg_ValveStopBtn,uc
 u32 uwg_NewUsart2Baund,uwg_OldUsart2Baund;
 u8 ucg_NewUsart2SlaveAddress,ucg_OldUsart2SlaveAddress,ucg_BaundSlaveAddressSetBtn;
 
-u16 uhwg_X1ResetOffest=250; u16 uhwg_Y1ResetOffest=220; u16 uhwg_Z1ResetOffest=20; u16 uhwg_A1ResetOffest=500;
-u16 uhwg_X2ResetOffest=400; u16 uhwg_Y2ResetOffest=250; u16 uhwg_Z2ResetOffest=50; u16 uhwg_A2ResetOffest;
-u16 uhwg_X3ResetOffest; u16 uhwg_Y3ResetOffest; u16 uhwg_Z3ResetOffest; u16 uhwg_A3ResetOffest;
-
 u8 ucg_MotionPosition_flag[10];//数组的值表示哪个仓体被选中,序号表示是哪一组，软件上暂时限定支持10组任务同时运行，具体几组看硬件限制
 u8 ucg_UncapPosition_flag;
 
-u16 ZstepShakeinterval=100;
-u16 Z1ShakeSpeed=250;
-u16 Z1ShakeAcc=250;
+u16 ZstepShakeinterval=250;
+u16 Z1ShakeSpeed=150;
+u16 Z1ShakeAcc=80;
 u16 Z1ShakeDec=250;
+u16 Z1Shaketime=3000;//抖液时间，单位ms
 
 
 int16 uhwg_MotionPosition_Offest[33][3]={
@@ -134,9 +97,11 @@ u32 uhwg_UncapPosition_Compose[33][3]={
 u16 uhwg_liucheng1ReactTime[30];//流程1反应时间
 u8 ucg_liucheng1shijiNum[30];//选中的流程1的试剂号
 int16 uhwg_SetTemp[4];//温度设置值
+u8 ucg_SetTempBuf[8];//温度设置值存储缓冲区
 int16 uhwg_RealTemp[4];//温度实时值
 u8 ucg_SetTempFlag[4];//温度设置标志位，1表示开启温控，0表示关闭温控
 u16 uhwg_SetTempPID[16];//温度PID及温度校准参数0-3为1-4号温控P参数，4-7为1-4号温控I参数，8-11为1-4号温控D参数，12-15为1-4号温度校准参数
+u8 ucg_SetTempPIDBuf[32];//温度PID及温度校准参数存储缓冲区
 u8 ucg_SendPidFlag;//温度PID发送标志位，1表示发送，0表示不发送
 
 SemaphoreHandle_t MODH_CmdMutex= NULL; //防止Modbus指令发送冲突的互斥锁
@@ -159,3 +124,9 @@ u8 SlicSensorCount;//光电传感器计数总和
 u8 InputOutSlicFlag;//输入输出玻片信号,1表示输入仓运行到输入位，2表示输入仓回零，3表示输出仓运行到输出位，4表示输出仓归零
 u8 TempControlFlag;//温度控制信号，1表示开启温控，2表示关闭温控
 u8 shiyanlicuheng1Flag;//实验流程1的开启信号
+
+u16 shiyan1Param[40][2];//实验流程1的参数
+u8 kaopian[10];//kaopian[0]表示是否需要烤片，kaopian[1]表示烤片时间
+u8 ActionTime1=5;//吊臂将样品放入试剂后Z1、Z2、Y2、复位动作的时间,这部份时间要算到样品的反应时间内
+u8 ActionTime2=6;//样品与试剂反应的时间结束后，机械臂将样品从试剂取出的动作时间，这部份时间要算到样品的反应时间内
+u8 ActionTime3=1;//下发指令后机械臂的响应时间

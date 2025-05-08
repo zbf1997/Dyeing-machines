@@ -20,22 +20,23 @@
 #include "modbus_host.h"
 #include "Moto_MotionAndUncap.h"
 #include "InputSlicDetect.h"
-
+#include "AT24Cxx.h"
 int main(void)
 { 
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
 	delay_init(168);
-    delay_ms(3000);
     Uart1Init(115200);//串口1和串口屏通讯   
     Uart3Init(115200);//串口3输出到串口调试助手
-	Usart_FIFO_Init(); //串口2用于modbus通讯                                                                   			                                                                                                                                                                               
+	Usart_FIFO_Init(); //串口2用于modbus通讯
+    SetScreen(10);
+    //delay_ms(3000);                                                                   			                                                                                                                                                                               
 	KEY_Init();
-	Him_Init();
     Timer5_Init();
     bsp_InitHardTimer();
     PositionInit();
     InputSlicDetect_Init();
     MotoInit();
+	AT24CXX_Init();
     TIM_Cmd(TIM5, DISABLE);//定时器5用于RTOS未运行时的定时,防止频繁的中断导致系统变慢
     xTaskCreate((TaskFunction_t )start_task,            //任务函数
                 (const char*    )"start_task",          //任务名称
@@ -46,7 +47,6 @@ int main(void)
     vTaskStartScheduler();          //开启任务调度
 }
 
-//开始任务任务函数
 void start_task(void *pvParameters)
 {
     taskENTER_CRITICAL();           //进入临界区
@@ -57,6 +57,7 @@ void start_task(void *pvParameters)
     TempControlBianry=xSemaphoreCreateBinary();
     shiyanlicuheng1Bianry=xSemaphoreCreateBinary();
     ValvePumpBianry=xSemaphoreCreateBinary();
+    
   	xTaskCreate((TaskFunction_t )Process_message,     	
                 (const char*    )"Process_message",   	
                 (uint16_t       )Process_message_SIZE, 
@@ -77,14 +78,14 @@ void start_task(void *pvParameters)
                 (void*          )NULL,				
                 (UBaseType_t    )LED0_TASK_PRIO,	
                 (TaskHandle_t*  )&LED0Task_Handler); 
-
+/*
     xTaskCreate((TaskFunction_t )MotoStausCheck,     	
                 (const char*    )"MotoStausCheck",   	
                 (uint16_t       )MotoStausCheck_STK_SIZE, 
                 (void*          )NULL,				
                 (UBaseType_t    )MotoStausCheck_TASK_PRIO,	
                 (TaskHandle_t*  )&MotoStausCheckTask_Handler);
-
+*/
     xTaskCreate((TaskFunction_t )MonitorTasks,     	
                 (const char*    )"MonitorTasks",   	
                 (uint16_t       )MonitorTasks_STK_SIZE, 
@@ -119,7 +120,8 @@ void start_task(void *pvParameters)
                 (void*          )NULL,				
                 (UBaseType_t    )ValvePump_TASK_PRIO,	
                 (TaskHandle_t*  )&ValvePump_Handler);
-
+    Him_Init();
+    SetScreen(2);
     vTaskDelete(StartTask_Handler); //删除开始任务
 	taskEXIT_CRITICAL();            //退出临界区
 }
@@ -138,16 +140,18 @@ void Process_message(void *pvParameters)
             {                                                                           
                 ProcessMessage((PCTRL_MSG)cmd_buffer, size);                             //对串口屏指令进行处理  
             }                                                                           
-            else if(size>0&&cmd_buffer[1]==0x07)                                         //如果串口屏指令为0x07开机指令说明串口屏重启了，此时对STM32进行软件重启，再进行一次软硬件的初始化  
+            else if(size>0&&cmd_buffer[1]==0x07)                                           
             {                                                                           
-                __disable_fault_irq();                                                   
-                NVIC_SystemReset();                                                                                                                                          
+                // __disable_fault_irq();//如果串口屏指令为0x07开机指令说明串口屏重启了，此时对STM32进行软件重启，再进行一次软硬件的初始化                                                   
+                // NVIC_SystemReset();
+
+                Him_Init(); //在freertos下对stm32进行软重启会造成死机，暂时未找到原因,采用重新初始化串口屏的方式，将存储的数据显示
+                SetScreen(2); //重新设置串口屏界面
             }
         }
 	}
 }  
 
-//LED任务函数 
 void led0_task(void *pvParameters)
 {
 	LED_Init();
@@ -160,6 +164,7 @@ void led0_task(void *pvParameters)
         
     }
 }
+
 void MotoStausCheck(void *pvParameters)
 {
     u8 str[20];
@@ -167,6 +172,7 @@ void MotoStausCheck(void *pvParameters)
     TickType_t xLastTime, xLastTime1;
     while(1)
     {
+        
         MODH_WriteOrReadParam(3,1,LSMotoLocation,0,2,NULL,MODH_CmdMutex);//查询X1的绝对位置
         MODH_WriteOrReadParam(3,2,LSMotoLocation,0,2,NULL,MODH_CmdMutex);//查询Y1的绝对位置
         MODH_WriteOrReadParam(3,3,LSMotoLocation,0,2,NULL,MODH_CmdMutex);//查询Z1的绝对位置
@@ -222,7 +228,7 @@ void MotoStausCheck(void *pvParameters)
             xLastTime1 = xTaskGetTickCount();
         } 
   
-        if (xTaskGetTickCount() - xLastTime > pdMS_TO_TICKS(20000)) {  // 每5秒执行一次  
+        if (xTaskGetTickCount() - xLastTime > pdMS_TO_TICKS(20000)) {  // 每20秒执行一次  
             char pcBuffer[1000];  
             vTaskList(pcBuffer);  // 生成任务状态表格
             printf("任务状态:\n%s\n", pcBuffer);  
@@ -366,14 +372,96 @@ void InputOutSlic(void *pvParameters)
 
 void shiyanlicuheng1(void *pvParameters)//实验流程1
 {
+    u8 fanyingTime;//试剂反应时间
     while(1)
     {
         if (xSemaphoreTake(shiyanlicuheng1Bianry,portMAX_DELAY) == pdTRUE)
         {
-            if (shiyanlicuheng1Flag == 1)//用户按下实验流程1
+            if(ucg_X3Y3Z3A3RunBtn==1)
             {
-                shiyanlicuheng1Flag = 0;//实验流程1
+                AxisMotors[8].RunMode=HYMode;//永动模式
+                AxisMotors[8].MotoModBuf[16]=GET_BYTE1(AxisMotors[8].RunMode);
+                AxisMotors[8].MotoModBuf[17]=GET_BYTE0(AxisMotors[8].RunMode);
+                delay_ms(500);
+                MODH_WriteOrReadParam(10,11,0,0,9,AxisMotors[8].MotoModBuf,MODH_CmdMutex);//写入X3电机行程，单次步数，加速度，减速度，速度，电流，运行模式
+                delay_ms(500);
+                MODH_WriteOrReadParam(10,11,0x0C,0,9,AxisMotors[8].MotoModBuf,MODH_CmdMutex);//写入Y3电机行程，单次步数，加速度，减速度，速度，电流，运行模式
+                delay_ms(500);
+                MODH_WriteOrReadParam(10,11,0x18,0,9,AxisMotors[8].MotoModBuf,MODH_CmdMutex);//写入Z3电机行程，单次步数，加速度，减速度，速度，电流，运行模式
+                delay_ms(500);
+                MODH_WriteOrReadParam(10,11,0x24,0,9,AxisMotors[8].MotoModBuf,MODH_CmdMutex);//写入A3电机行程，单次步数，加速度，减速度，速度，电流，运行模式
+                delay_ms(60);
             }
+            if(kaopian[0]==1)
+            {
+                StainingPodStatus[29]=1;//假设输入仓有样品
+                TakeGetSample(1,29,0,0);
+                TakeGetSample(2,28,0,0);
+                vTaskDelay((kaopian[1]*1000)/portTICK_RATE_MS);
+                TakeGetSample(1,28,0,0);
+            }
+            else 
+            {
+                StainingPodStatus[29]=1;//假设输入仓有样品
+                TakeGetSample(1,29,0,0);
+            }
+            for(u8 i=0;i<40;i++)
+            {
+                if (shiyan1Param[i][0]!= 0)
+                {
+                    if(shiyan1Param[i][1]<=(ActionTime1+ActionTime2+ActionTime3))//反应时间小于等于机械臂将样品放入试剂后的复位时间
+                    { 
+                        TakeGetSampleNoCloseCap(2,TankAndReagenMapping(shiyan1Param[i][0]),0,0);
+                        if(shiyan1Param[i][1]>ActionTime3)
+                        {
+                            fanyingTime=shiyan1Param[i][1]-ActionTime3;
+                            vTaskDelay((fanyingTime*1000)/portTICK_RATE_MS);
+                        }
+                        TakeGetSampleNoCloseCap(1,TankAndReagenMapping(shiyan1Param[i][0]),1,Z1Shaketime);
+                    }
+                    else
+                    {
+                        TakeGetSample(2,TankAndReagenMapping(shiyan1Param[i][0]),0,0);
+                        fanyingTime=shiyan1Param[i][1]-(ActionTime1+ActionTime2+ActionTime3);
+                        vTaskDelay((fanyingTime*1000)/portTICK_RATE_MS);
+                        TakeGetSample(1,TankAndReagenMapping(shiyan1Param[i][0]),1,Z1Shaketime);
+                    }   
+                }
+            }
+            TakeGetSample(2,32,0,0);//将样品放到输出仓
+
+            /*X2移动到26号缸再进行复位，防止在某些位置复位时撞到盖臂*/
+            MODH_WriteOrReadParam(6,4,0x6201,GET_2BYTE_H(uhwg_UncapPosition_Compose[25][0]),0,NULL,MODH_CmdMutex);//设定PR0位置高位
+            MODH_WriteOrReadParam(6,4,0x6202,GET_2BYTE_L(uhwg_UncapPosition_Compose[25][0]),0,NULL,MODH_CmdMutex);//设定PR0位置低位
+            MODH_WriteOrReadParam(6,4,0x6002,0x10,0,NULL,MODH_CmdMutex);  //立即运行PR0
+            WaitMotoStop(4,LSMotoStatus,2);//等待X2轴完成
+
+            SetScreen(11);//流程结束弹出取走样品对话框
+            StainingPodStatus[32]=0;//恢复输出仓空闲状态
+
+            if(ucg_X3Y3Z3A3RunBtn==1)//如果启动混匀电机
+            {
+                AxisMotors[8].RunMode=StopMode;//混匀电机停机
+                AxisMotors[8].MotoModBuf[16]=GET_BYTE1(AxisMotors[8].RunMode);
+                AxisMotors[8].MotoModBuf[17]=GET_BYTE0(AxisMotors[8].RunMode);
+                delay_ms(500);
+                MODH_WriteOrReadParam(10,11,0,0,9,AxisMotors[8].MotoModBuf,MODH_CmdMutex);//X3停机
+                delay_ms(500);
+                MODH_WriteOrReadParam(10,11,0x0C,0,9,AxisMotors[8].MotoModBuf,MODH_CmdMutex);
+                delay_ms(500);
+                MODH_WriteOrReadParam(10,11,0x18,0,9,AxisMotors[8].MotoModBuf,MODH_CmdMutex);
+                delay_ms(500);
+                MODH_WriteOrReadParam(10,11,0x24,0,9,AxisMotors[8].MotoModBuf,MODH_CmdMutex);
+            }
+
+            X1Y1Z1GoHome();//机械臂复位
+            X2Y2Z2GoHome();
+            WaitMotoStop(1,LSMotoStatus,2);
+            WaitMotoStop(2,LSMotoStatus,2);
+            WaitMotoStop(3,LSMotoStatus,2);
+            WaitMotoStop(4,LSMotoStatus,2);
+            WaitMotoStop(5,LSMotoStatus,2);
+            WaitMotoStop(6,LSMotoStatus,2);
         }
     }
 }
@@ -455,13 +543,12 @@ void ValvePump(void *pvParameters)
                 {
                     if (ucg_ValveSwitch[i]==1)
                     {
-                        GetControlValue(2,2*i+2);
+                        GetControlValue(1,2*(i+1));//获取ucg_ValveDir[i]的值
                         vTaskDelay(70/portTICK_RATE_MS);
-                        printf("选中的阀ID为：%d，选择的阀方向为：%d\r\n",i,ucg_ValveDir[i]);
                         if(SlaveaddressSwitchTest==0)
-                        MODH_WriteOrReadParam(6,9,i,ucg_ValveDir[i],0,NULL,MODH_CmdMutex);//蠕动泵正转运行
+                        MODH_WriteOrReadParam(6,9,i,ucg_ValveDir[i],0,NULL,MODH_CmdMutex);//阀运行
                         if(SlaveaddressSwitchTest==1)
-                        MODH_WriteOrReadParam(6,10,i,ucg_ValveDir[i],0,NULL,MODH_CmdMutex);
+                        MODH_WriteOrReadParam(6,10,i,ucg_ValveDir[i],0,NULL,MODH_CmdMutex);//泵运行
                     }
                 }
                 ucg_ValveRunBtn=0;
@@ -474,7 +561,7 @@ void ValvePump(void *pvParameters)
                     {
                         if(SlaveaddressSwitchTest==0)
                         vTaskDelay(70/portTICK_RATE_MS);
-                        MODH_WriteOrReadParam(6,9,i,ucg_ValveDir[i],0,NULL,MODH_CmdMutex);//蠕动泵正转运行
+                        MODH_WriteOrReadParam(6,9,i,ucg_ValveDir[i],0,NULL,MODH_CmdMutex);
                         if(SlaveaddressSwitchTest==1)
                         MODH_WriteOrReadParam(6,10,i,ucg_ValveDir[i],0,NULL,MODH_CmdMutex);
                     }
@@ -484,4 +571,3 @@ void ValvePump(void *pvParameters)
         } 
     }    
 }
-  

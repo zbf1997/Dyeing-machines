@@ -11,7 +11,42 @@
 #define GET_2BYTE_L(x) (((x) >> 0) & 0xffff) /* 获取低16位 */
 #define GET_2BYTE_H(x) (((x) >> 16) & 0xffff) /* 获取高16位 */
 #define Moto_OverTime 20000 //电机等待超时时间ms
+#define MotoX1 0
+#define MotoY1 1
+#define MotoZ1 2
+#define MotoA1 3
+#define MotoX2 4
+#define MotoY2 5
+#define MotoZ2 6
+#define MotoA2 7
+#define MotoX3 8
+#define MotoY3 9
+#define MotoZ3 10
+#define MotoA3 11
 
+typedef enum {
+      RelMode   = 1,//相对模式
+      AbsMode   = 2,//绝对模式
+      ResetMode = 3,//复位模式
+      StopMode  = 4,//停止模式
+      HYMode    = 7,//永动模式
+      AgingMode = 8 //老化模式
+  } MotorMode;
+
+// 电机参数结构定义
+typedef struct 
+{
+      int32_t MaxStep;        //最大步数
+      int32_t SingleStep;     //单次运行步数
+      uint16_t Acc;           //加速度
+      uint16_t Dec;           //减速度
+      uint16_t Speed;         //运行速度
+      uint16_t Current;       //电机电流
+      MotorMode RunMode;      //运行模式
+      uint8_t Status;         //电机状态
+      uint16_t ResetOffest;   //电机复位偏移量
+      u8 MotoModBuf[30];      //存储modbus传输数据,字节0-3存储最大行程，字节4-7运行步数，字节8-9加速度，字节10-11减速度，字节12-13运行速度，字节14-15电机电流，字节16运行模式,字节18-19复位偏移值
+} MotorParams;
 
 
 //任务优先级
@@ -79,9 +114,9 @@ extern TaskHandle_t MonitorTasks_Handler;
 void MonitorTasks(void *pvParameters);
 
 //任务优先级
-#define shiyanlicuheng1_TASK_PRIO		2
+#define shiyanlicuheng1_TASK_PRIO		4
 //任务堆栈大小	
-#define shiyanlicuheng1_STK_SIZE 		200  
+#define shiyanlicuheng1_STK_SIZE 		500  
 //任务句柄
 extern TaskHandle_t shiyanlicuheng1_Handler;
 //任务函数
@@ -105,61 +140,10 @@ extern TaskHandle_t ValvePump_Handler;
 //任务函数
 void ValvePump(void *pvParameters);
 
-
-
-extern int32 X1MotoMaxStep,X1MotoSingleStep,//最大行程，单次运行步数，当前位置
-      Y1MotoMaxStep,Y1MotoSingleStep,
-      Z1MotoMaxStep,Z1MotoSingleStep,
-      A1MotoMaxStep,A1MotoSingleStep,
-      X2MotoMaxStep,X2MotoSingleStep,
-      Y2MotoMaxStep,Y2MotoSingleStep,
-      Z2MotoMaxStep,Z2MotoSingleStep,
-      A2MotoMaxStep,A2MotoSingleStep,
-      X3MotoMaxStep,X3MotoSingleStep,
-      Y3MotoMaxStep,Y3MotoSingleStep,
-      Z3MotoMaxStep,Z3MotoSingleStep,
-      A3MotoMaxStep,A3MotoSingleStep;
-
-
-extern uint16 X1MotoAcc,X1MotoDec,X1MotoCurrent,//加速度，减速度，电机电流
-       Y1MotoAcc,Y1MotoDec,Y1MotoCurrent,
-       Z1MotoAcc,Z1MotoDec,Z1MotoCurrent,
-       A1MotoAcc,A1MotoDec,A1MotoCurrent,
-       X2MotoAcc,X2MotoDec,X2MotoCurrent,
-       Y2MotoAcc,Y2MotoDec,Y2MotoCurrent,
-       Z2MotoAcc,Z2MotoDec,Z2MotoCurrent,
-       A2MotoAcc,A2MotoDec,A2MotoCurrent,
-       X3MotoAcc,X3MotoDec,X3MotoCurrent,
-       Y3MotoAcc,Y3MotoDec,Y3MotoCurrent,
-       Z3MotoAcc,Z3MotoDec,Z3MotoCurrent,
-       A3MotoAcc,A3MotoDec,A3MotoCurrent;
-
-extern uint8 X1MotoStatus,X1MotoRunMode,//电机状态，运行速度，运行模式
-       Y1MotoStatus,Y1MotoRunMode, 
-       Z1MotoStatus,Z1MotoRunMode,
-       A1MotoStatus,A1MotoRunMode,
-       X2MotoStatus,X2MotoRunMode,
-       Y2MotoStatus,Y2MotoRunMode, 
-       Z2MotoStatus,Z2MotoRunMode,
-       A2MotoStatus,A2MotoRunMode,
-       X3MotoStatus,X3MotoRunMode,
-       Y3MotoStatus,Y3MotoRunMode, 
-       Z3MotoStatus,Z3MotoRunMode,
-       A3MotoStatus,A3MotoRunMode;
-extern u16 X1MotoSpeed,Y1MotoSpeed,Z1MotoSpeed,A1MotoSpeed,
-            X2MotoSpeed,Y2MotoSpeed,Z2MotoSpeed,A2MotoSpeed,
-            X3MotoSpeed,Y3MotoSpeed,Z3MotoSpeed,A3MotoSpeed;
-
-
-
-
 extern volatile uint16 ucg_Temp_ch1,MotoStatus[10];
 extern uint8  cmd_buffer[CMD_MAX_SIZE]; 
 extern volatile int32 MotoLocation[10];
-
-extern u8 ucg_X1MotoModBuf[30],ucg_Y1MotoModBuf[30],ucg_Z1MotoModBuf[30],ucg_A1MotoModBuf[30],//存储modbus传输数据,字节0-3存储最大行程，字节4-7运行步数，字节8-9加速度，字节10-11减速度，字节12-13运行速度，字节14-15电机电流，字节16-17运行模式
-   ucg_X2MotoModBuf[30],ucg_Y2MotoModBuf[30],ucg_Z2MotoModBuf[30],ucg_A2MotoModBuf[30],
-   ucg_X3MotoModBuf[30],ucg_Y3MotoModBuf[30],ucg_Z3MotoModBuf[30],ucg_A3MotoModBuf[30];
+extern MotorParams AxisMotors[12];
 
 extern u8 ucg_ValveModBuf[45][10];
 extern u8 ucg_X1MotoRun1Btn,ucg_Y1MotoRun1Btn,ucg_Z1MotoRun1Btn,ucg_A1MotoRunBtn,ucg_X1Y1Z1RunBtn,ucg_X1Y1Z1RstBtn,ucg_X1Y1Z1StopBtn,
@@ -181,7 +165,7 @@ extern u16   uhwg_X1ResetOffest,uhwg_Y1ResetOffest,uhwg_Z1ResetOffest,uhwg_A1Res
       uhwg_X3ResetOffest,uhwg_Y3ResetOffest,uhwg_Z3ResetOffest,uhwg_A3ResetOffest;
 extern u8 ucg_MotionPosition_flag[10];
 extern u8 ucg_UncapPosition_flag;
-extern u16 ZstepShakeinterval,Z1ShakeSpeed,Z1ShakeAcc,Z1ShakeDec;
+extern u16 ZstepShakeinterval,Z1ShakeSpeed,Z1ShakeAcc,Z1ShakeDec,Z1Shaketime;
 
 extern int16 uhwg_MotionPosition_Offest[33][3];
 extern u32 uhwg_MotionPosition_Initial[33][3];
@@ -191,9 +175,11 @@ extern u32 uhwg_UncapPosition_Initial[33][3];
 extern u32 uhwg_UncapPosition_Compose[33][3];
 extern u16 uhw_liucheng1ReactTime[30];
 extern int16 uhwg_SetTemp[4];
+extern u8 ucg_SetTempBuf[8];
 extern int16 uhwg_RealTemp[4];
 extern u8 ucg_SetTempFlag[4];
 extern u16 uhwg_SetTempPID[16];
+extern u8 ucg_SetTempPIDBuf[32];
 extern u8 ucg_SendPidFlag;
 
 extern SemaphoreHandle_t MODH_CmdMutex;
@@ -207,4 +193,11 @@ extern u8 StainingNumTest;
 extern u8 SlaveaddressSwitchTest;
 extern volatile u8 MotoTaskFlag;//任务挂起标志位,0表示任务继续，1表示任务挂起，2表示任务结束
 extern u8 SlicSensor1count,SlicSensor2count,SlicSensor3count,SlicSensorCount,InputOutSlicFlag,TempControlFlag,shiyanlicuheng1Flag;
+
+extern u16 shiyan1Param[40][2];
+extern u8 kaopian[10];//kaopian[0]表示是否需要烤片，kaopian[1]表示烤片时间
+extern u8 ActionTime1;
+extern u8 ActionTime2;
+extern u8 ActionTime3;
+
 #endif

@@ -107,12 +107,12 @@
         <DllOption>
           <SimDllName>SARMCM3.DLL</SimDllName>
           <SimDllArguments> -REMAP -MPU</SimDllArguments>
-          <SimDlgDll>DCM.DLL</SimDlgDll>
-          <SimDlgDllArguments>-pCM4</SimDlgDllArguments>
+          <SimDlgDll>DARMSTM.DLL</SimDlgDll>
+          <SimDlgDllArguments>-pSTM32F407ZG</SimDlgDllArguments>
           <TargetDllName>SARMCM3.DLL</TargetDllName>
           <TargetDllArguments> -MPU</TargetDllArguments>
-          <TargetDlgDll>TCM.DLL</TargetDlgDll>
-          <TargetDlgDllArguments>-pCM4</TargetDlgDllArguments>
+          <TargetDlgDll>TARMSTM.DLL</TargetDlgDll>
+          <TargetDlgDllArguments>-pSTM32F407ZG</TargetDlgDllArguments>
         </DllOption>
         <DebugOption>
           <OPTHX>
@@ -482,6 +482,11 @@
               <FileName>InputSlicDetect.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\src\InputSlicDetect.c</FilePath>
+            </File>
+            <File>
+              <FileName>AT24Cxx.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\src\AT24Cxx.c</FilePath>
             </File>
           </Files>
         </Group>

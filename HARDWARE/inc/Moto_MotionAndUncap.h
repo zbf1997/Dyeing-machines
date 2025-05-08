@@ -18,6 +18,7 @@ void WaitMotoPosition(u8 SlaveAddress,u16 reg,u16 num,int32 Position,u8 Dir );
 void UpDownBasket(u8 Dir,u8 StainingNumber,u8 ShakeWaterFlag,u16 millisecond);
 void UpDownCap(u8 Dir,u8 StainingNumber);
 void TakeGetSample(u8 Dir,u8 StainingNumber,u8 ShakeWaterFlag,u16 millisecond);
+void TakeGetSampleNoCloseCap(u8 Dir,u8 StainingNumber,u8 ShakeWaterFlag,u16 millisecond);
 void X1Y1MotoMove(u8 StainingNumber);
 void ConvertStep(u8* p,int32 step);
 void ConvertRunMode(u8* p,int32 step);
@@ -31,4 +32,5 @@ void ShakeWater(u32 ShakeTime);
 void MotoBasketCapInit();
 void MODH_WriteOrReadParam(uint8_t WriteOrRead, uint8_t SlaveAddr, uint16_t _reg, uint16_t _value,uint16_t _num,uint8_t *_buf,SemaphoreHandle_t SemaHandle);
 void testliucheng();
+u8 TankAndReagenMapping(u8 reagnum);
 #endif

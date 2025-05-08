@@ -16,9 +16,9 @@ void  moto_task(void *pvParameters)
         {
             ucg_X1MotoRun1Btn=0;
             MODH_WriteOrReadParam(6,1,0x6200,0x41,0,NULL,MODH_CmdMutex);//设定PR0模式为相对模式
-            value1=GET_2BYTE_H(X1MotoSingleStep);
+            value1=GET_2BYTE_H(AxisMotors[0].SingleStep);
             MODH_WriteOrReadParam(6,1,0x6201,value1,0,NULL,MODH_CmdMutex);//设定PR0位置高位
-            value1=GET_2BYTE_L(X1MotoSingleStep); 
+            value1=GET_2BYTE_L(AxisMotors[0].SingleStep); 
             MODH_WriteOrReadParam(6,1,0x6202,value1,0,NULL,MODH_CmdMutex);//设定PR0位置低位
             MODH_WriteOrReadParam(6,1,0x6207,0x10,0,NULL,MODH_CmdMutex);  //立即运行
         }
@@ -27,9 +27,9 @@ void  moto_task(void *pvParameters)
             ucg_Y1MotoRun1Btn=0;
 
             MODH_WriteOrReadParam(6,2,0x6200,0x41,0,NULL,MODH_CmdMutex);//设定PR0模式为相对模式
-            value1=GET_2BYTE_H(Y1MotoSingleStep);
+            value1=GET_2BYTE_H(AxisMotors[1].SingleStep);
             MODH_WriteOrReadParam(6,2,0x6201,value1,0,NULL,MODH_CmdMutex);//设定PR0位置高位
-            value1=GET_2BYTE_L(Y1MotoSingleStep); 
+            value1=GET_2BYTE_L(AxisMotors[1].SingleStep); 
             MODH_WriteOrReadParam(6,2,0x6202,value1,0,NULL,MODH_CmdMutex);//设定PR0位置低位
             MODH_WriteOrReadParam(6,2,0x6207,0x10,0,NULL,MODH_CmdMutex);  //立即运行
         }
@@ -38,9 +38,9 @@ void  moto_task(void *pvParameters)
             ucg_Z1MotoRun1Btn=0;
 
             MODH_WriteOrReadParam(6,3,0x6200,0x41,0,NULL,MODH_CmdMutex);//设定PR0模式为相对模式
-            value1=GET_2BYTE_H(Z1MotoSingleStep);
+            value1=GET_2BYTE_H(AxisMotors[2].SingleStep);
             MODH_WriteOrReadParam(6,3,0x6201,value1,0,NULL,MODH_CmdMutex);//设定PR0位置高位
-            value1=GET_2BYTE_L(Z1MotoSingleStep); 
+            value1=GET_2BYTE_L(AxisMotors[2].SingleStep); 
             MODH_WriteOrReadParam(6,3,0x6202,value1,0,NULL,MODH_CmdMutex);//设定PR0位置低位
             MODH_WriteOrReadParam(6,3,0x6207,0x10,0,NULL,MODH_CmdMutex);  //立即运行
         }
@@ -50,10 +50,10 @@ void  moto_task(void *pvParameters)
             
             MODH_WriteOrReadParam(6,1,0x6200,0X01,0,NULL,MODH_CmdMutex);//设定PR0模式为绝对模式
             
-            value1=GET_2BYTE_H(X1MotoSingleStep);
+            value1=GET_2BYTE_H(AxisMotors[0].SingleStep);
             MODH_WriteOrReadParam(6,1,0x6201,value1,0,NULL,MODH_CmdMutex);//设定PR0位置高位
             
-            value1=GET_2BYTE_L(X1MotoSingleStep); 
+            value1=GET_2BYTE_L(AxisMotors[0].SingleStep); 
             MODH_WriteOrReadParam(6,1,0x6202,value1,0,NULL,MODH_CmdMutex);//设定PR0位置低位
             
             MODH_WriteOrReadParam(6,1,0x6207,0x10,0,NULL,MODH_CmdMutex);  //立即运行
@@ -65,10 +65,10 @@ void  moto_task(void *pvParameters)
             
             MODH_WriteOrReadParam(6,2,0x6200,0X01,0,NULL,MODH_CmdMutex);//设定PR0模式为绝对模式
             
-            value1=GET_2BYTE_H(Y1MotoSingleStep);
+            value1=GET_2BYTE_H(AxisMotors[1].SingleStep);
             MODH_WriteOrReadParam(6,2,0x6201,value1,0,NULL,MODH_CmdMutex);//设定PR0位置高位
             
-            value1=GET_2BYTE_L(Y1MotoSingleStep); 
+            value1=GET_2BYTE_L(AxisMotors[1].SingleStep); 
             MODH_WriteOrReadParam(6,2,0x6202,value1,0,NULL,MODH_CmdMutex);//设定PR0位置低位
             
             MODH_WriteOrReadParam(6,2,0x6207,0x10,0,NULL,MODH_CmdMutex);  //立即运行
@@ -80,10 +80,10 @@ void  moto_task(void *pvParameters)
             
             MODH_WriteOrReadParam(6,3,0x6200,0X01,0,NULL,MODH_CmdMutex);//设定PR0模式为绝对模式
             
-            value1=GET_2BYTE_H(Z1MotoSingleStep);
+            value1=GET_2BYTE_H(AxisMotors[2].SingleStep);
             MODH_WriteOrReadParam(6,3,0x6201,value1,0,NULL,MODH_CmdMutex);//设定PR0位置高位
             
-            value1=GET_2BYTE_L(Z1MotoSingleStep); 
+            value1=GET_2BYTE_L(AxisMotors[2].SingleStep); 
             MODH_WriteOrReadParam(6,3,0x6202,value1,0,NULL,MODH_CmdMutex);//设定PR0位置低位
             
             MODH_WriteOrReadParam(6,3,0x6207,0x10,0,NULL,MODH_CmdMutex);  //立即运行
@@ -162,10 +162,10 @@ void  moto_task(void *pvParameters)
             
             MODH_WriteOrReadParam(6,4,0x6200,0x41,0,NULL,MODH_CmdMutex);//设定PR0模式为相对模式
             
-            value1=GET_2BYTE_H(X2MotoSingleStep);
+            value1=GET_2BYTE_H(AxisMotors[4].SingleStep);
             MODH_WriteOrReadParam(6,4,0x6201,value1,0,NULL,MODH_CmdMutex);//设定PR0位置高位
             
-            value1=GET_2BYTE_L(X2MotoSingleStep); 
+            value1=GET_2BYTE_L(AxisMotors[4].SingleStep); 
             MODH_WriteOrReadParam(6,4,0x6202,value1,0,NULL,MODH_CmdMutex);//设定PR0位置低位
             
             MODH_WriteOrReadParam(6,4,0x6207,0x10,0,NULL,MODH_CmdMutex);  //立即运行
@@ -177,10 +177,10 @@ void  moto_task(void *pvParameters)
             
             MODH_WriteOrReadParam(6,5,0x6200,0x41,0,NULL,MODH_CmdMutex);//设定PR0模式为相对模式
             
-            value1=GET_2BYTE_H(Y2MotoSingleStep);
+            value1=GET_2BYTE_H(AxisMotors[5].SingleStep);
             MODH_WriteOrReadParam(6,5,0x6201,value1,0,NULL,MODH_CmdMutex);//设定PR0位置高位
             
-            value1=GET_2BYTE_L(Y2MotoSingleStep); 
+            value1=GET_2BYTE_L(AxisMotors[5].SingleStep); 
             MODH_WriteOrReadParam(6,5,0x6202,value1,0,NULL,MODH_CmdMutex);//设定PR0位置低位
             
             MODH_WriteOrReadParam(6,5,0x6207,0x10,0,NULL,MODH_CmdMutex);  //立即运行
@@ -192,10 +192,10 @@ void  moto_task(void *pvParameters)
             
             MODH_WriteOrReadParam(6,6,0x6200,0x41,0,NULL,MODH_CmdMutex);//设定PR0模式为相对模式
             
-            value1=GET_2BYTE_H(Z2MotoSingleStep);
+            value1=GET_2BYTE_H(AxisMotors[6].SingleStep);
             MODH_WriteOrReadParam(6,6,0x6201,value1,0,NULL,MODH_CmdMutex);//设定PR0位置高位
             
-            value1=GET_2BYTE_L(Z2MotoSingleStep); 
+            value1=GET_2BYTE_L(AxisMotors[6].SingleStep); 
             MODH_WriteOrReadParam(6,6,0x6202,value1,0,NULL,MODH_CmdMutex);//设定PR0位置低位
             
             MODH_WriteOrReadParam(6,6,0x6207,0x10,0,NULL,MODH_CmdMutex);  //立即运行
@@ -207,10 +207,10 @@ void  moto_task(void *pvParameters)
             
             MODH_WriteOrReadParam(6,4,0x6200,0X01,0,NULL,MODH_CmdMutex);//设定PR0模式为绝对模式
             
-            value1=GET_2BYTE_H(X2MotoSingleStep);
+            value1=GET_2BYTE_H(AxisMotors[4].SingleStep);
             MODH_WriteOrReadParam(6,4,0x6201,value1,0,NULL,MODH_CmdMutex);//设定PR0位置高位
             
-            value1=GET_2BYTE_L(X2MotoSingleStep); 
+            value1=GET_2BYTE_L(AxisMotors[4].SingleStep); 
             MODH_WriteOrReadParam(6,4,0x6202,value1,0,NULL,MODH_CmdMutex);//设定PR0位置低位
             
             MODH_WriteOrReadParam(6,4,0x6207,0x10,0,NULL,MODH_CmdMutex);  //立即运行
@@ -222,10 +222,10 @@ void  moto_task(void *pvParameters)
             
             MODH_WriteOrReadParam(6,5,0x6200,0X01,0,NULL,MODH_CmdMutex);//设定PR0模式为绝对模式
             
-            value1=GET_2BYTE_H(Y2MotoSingleStep);
+            value1=GET_2BYTE_H(AxisMotors[5].SingleStep);
             MODH_WriteOrReadParam(6,5,0x6201,value1,0,NULL,MODH_CmdMutex);//设定PR0位置高位
             
-            value1=GET_2BYTE_L(Y2MotoSingleStep); 
+            value1=GET_2BYTE_L(AxisMotors[5].SingleStep); 
             MODH_WriteOrReadParam(6,5,0x6202,value1,0,NULL,MODH_CmdMutex);//设定PR0位置低位
             
             MODH_WriteOrReadParam(6,5,0x6207,0x10,0,NULL,MODH_CmdMutex);  //立即运行
@@ -237,10 +237,10 @@ void  moto_task(void *pvParameters)
             
             MODH_WriteOrReadParam(6,6,0x6200,0X01,0,NULL,MODH_CmdMutex);//设定PR0模式为绝对模式
             
-            value1=GET_2BYTE_H(Z2MotoSingleStep);
+            value1=GET_2BYTE_H(AxisMotors[6].SingleStep);
             MODH_WriteOrReadParam(6,6,0x6201,value1,0,NULL,MODH_CmdMutex);//设定PR0位置高位
             
-            value1=GET_2BYTE_L(Z2MotoSingleStep); 
+            value1=GET_2BYTE_L(AxisMotors[6].SingleStep); 
             MODH_WriteOrReadParam(6,6,0x6202,value1,0,NULL,MODH_CmdMutex);//设定PR0位置低位
             
             MODH_WriteOrReadParam(6,6,0x6207,0x10,0,NULL,MODH_CmdMutex);  //立即运行
@@ -354,37 +354,6 @@ void  moto_task(void *pvParameters)
             // bsp_SetUsart2Baud(uwg_NewUsart2Baund);
             ucg_BaundSlaveAddressSetBtn=0;
         }
-        if(ucg_X3Y3Z3A3RunBtn==1)
-        {
-            ucg_X3Y3Z3A3RunBtn=0;
-            X3MotoRunMode=7;//永动模式
-            ucg_X3MotoModBuf[16]=GET_BYTE1(X3MotoRunMode);
-            ucg_X3MotoModBuf[17]=GET_BYTE0(X3MotoRunMode);
-            delay_ms(500);
-            MODH_WriteOrReadParam(10,11,0,0,9,ucg_X3MotoModBuf,MODH_CmdMutex);//写入X3电机行程，单次步数，加速度，减速度，速度，电流，运行模式
-            delay_ms(500);
-            MODH_WriteOrReadParam(10,11,0x0C,0,9,ucg_X3MotoModBuf,MODH_CmdMutex);//写入Y3电机行程，单次步数，加速度，减速度，速度，电流，运行模式
-            delay_ms(500);
-            MODH_WriteOrReadParam(10,11,0x18,0,9,ucg_X3MotoModBuf,MODH_CmdMutex);//写入Z3电机行程，单次步数，加速度，减速度，速度，电流，运行模式
-            delay_ms(500);
-            MODH_WriteOrReadParam(10,11,0x24,0,9,ucg_X3MotoModBuf,MODH_CmdMutex);//写入A3电机行程，单次步数，加速度，减速度，速度，电流，运行模式
-            
-        }
-        if(ucg_X3Y3Z3A3StopBtn==1)
-        {
-            ucg_X3Y3Z3A3StopBtn=0;
-            X3MotoRunMode=4;//停机
-            ucg_X3MotoModBuf[16]=GET_BYTE1(X3MotoRunMode);
-            ucg_X3MotoModBuf[17]=GET_BYTE0(X3MotoRunMode);
-            delay_ms(500);
-            MODH_WriteOrReadParam(10,11,0,0,9,ucg_X3MotoModBuf,MODH_CmdMutex);//X3停机
-            delay_ms(500);
-            MODH_WriteOrReadParam(10,11,0x0C,0,9,ucg_X3MotoModBuf,MODH_CmdMutex);
-            delay_ms(500);
-            MODH_WriteOrReadParam(10,11,0x18,0,9,ucg_X3MotoModBuf,MODH_CmdMutex);
-            delay_ms(500);
-            MODH_WriteOrReadParam(10,11,0x24,0,9,ucg_X3MotoModBuf,MODH_CmdMutex);
-        }
         vTaskDelay(200/portTICK_RATE_MS);
     }
 }
@@ -394,7 +363,7 @@ void  moto_task(void *pvParameters)
 *	功能说明: 控制Z1轴、Y1轴运动取放吊篮
 *	形    参: Dir : 1取吊篮，2放吊篮
 *             StainingNumber：选中的仓体序号
-*			  ShakeWaterFlag：是否开启抖水
+*			  ShakeWaterFlag：取吊篮时是否开启抖水，1开启，0关闭
 *			  millisecond：抖水时间
 *	返 回 值: 无
 
@@ -561,7 +530,7 @@ void UpDownCap(u8 Dir,u8 StainingNumber)
 *	功能说明: 控制X1、Y1、Z1、X2、Y2、Z2运动将样品从选定的仓体内放入或者取出
 *	形    参: Dir : 1取样品，2放样品
 *			  StainingNumber : 选中的仓体序号 
-*			  ShakeWaterFlag : 是否需要抖水
+*			  ShakeWaterFlag : 取吊篮时是否开启抖水，1开启，0关闭
 *			  millisecond : 抖水时间
 *	返 回 值: 无
 *	返 回 值: 无
@@ -590,7 +559,54 @@ void TakeGetSample(u8 Dir,u8 StainingNumber,u8 ShakeWaterFlag,u16 millisecond)
         }
     }
 }
+void TakeGetSampleNoCloseCap(u8 Dir,u8 StainingNumber,u8 ShakeWaterFlag,u16 millisecond)//不关盖放样取样
+{
+    
+    if(Dir==1)
+    {
+        if(StainingPodStatus[StainingNumber]==1)//仓内有样品，可以取出
+        {
+            if (ShakeWaterFlag==1) //是否开启抖水
+            {
+                ShakeWater(millisecond);//抖毫秒
+            }
 
+            /*升起吊篮至负限位*/
+            MODH_WriteOrReadParam(6,3,0x6002,0x15,0,NULL,MODH_CmdMutex);  //立即运行PR5
+            WaitMotoStop(3,LSMotoStatus,2);//等待Z轴完成
+            MODH_WriteOrReadParam(6,3,0x6002,0X20,0,NULL,MODH_CmdMutex);//触发Z1回零
+            WaitMotoStop(3,LSMotoStatus,2);//等待Z轴完成
+            StainingPodStatus[StainingNumber]=0;//仓状态设为空闲
+            UpDownCap(2,StainingNumber);//关盖
+        }
+    }
+ 
+    if(Dir==2)
+    {
+        X1Y1MotoMove(StainingNumber);
+        if(StainingPodStatus[StainingNumber]==0)//仓内没样品，可以放入
+        {
+            UpDownCap(1,StainingNumber);//开盖
+
+            /*移动到吊篮槽的正上方*/
+            if(StainingNumber>=29)//由于仓体序号大于等于29的仓体没有盖子，不需要开盖，所以要等X1Y1Z1MotoMove运动完再进行吊篮取放
+            {
+                WaitMotoStop(1,LSMotoStatus,2);//等待X1轴完成
+                WaitMotoStop(2,LSMotoStatus,2);//等待Y1轴完成
+                WaitMotoStop(3,LSMotoStatus,2);//等待Z1轴完成
+            }
+            MODH_WriteOrReadParam(6,2,0x6002,0x11,0,NULL,MODH_CmdMutex);  //立即运行PR1
+            WaitMotoStop(2,LSMotoStatus,2);//等待Y轴完成
+            
+            /*放下吊篮至吊篮槽内*/
+            MODH_WriteOrReadParam(6,3,0x6002,0x10,0,NULL,MODH_CmdMutex);  //立即运行PR0
+            WaitMotoStop(3,LSMotoStatus,2);//等待Z轴完成
+            MODH_WriteOrReadParam(6,3,0x6002,0x11,0,NULL,MODH_CmdMutex);  //立即运行PR1
+            WaitMotoStop(3,LSMotoStatus,2);//等待Z轴完成
+            StainingPodStatus[StainingNumber]=1;                           
+        }
+    }
+}
 /**********************************************************************************************************
 *	函 数 名: WaitMotoStop
 *	功能说明: 查询电机运行状态，如果正在运行则一直等待
@@ -932,17 +948,17 @@ void MotoBasketCapInit()//初始化取放吊篮和开关盖路径
     MODH_WriteOrReadParam(6,2,0x6208,0X41,0,NULL,MODH_CmdMutex);//设定PR1模式为相对模式
     MODH_WriteOrReadParam(6,2,0x6209,GET_2BYTE_H(Y1Interval),0,NULL,MODH_CmdMutex);//设定PR1位置高位
     MODH_WriteOrReadParam(6,2,0x620A,GET_2BYTE_L(Y1Interval),0,NULL,MODH_CmdMutex);//设定PR1位置低位
-    MODH_WriteOrReadParam(6,2,0x620B,Y1MotoSpeed,0,NULL,MODH_CmdMutex);//设定PR1速度 rpm
-    MODH_WriteOrReadParam(6,2,0x620C,Y1MotoAcc,0,NULL,MODH_CmdMutex);//设定PR1加速度 ms/Krpm
-    MODH_WriteOrReadParam(6,2,0x620D,Y1MotoDec,0,NULL,MODH_CmdMutex);//设定PR1减速度 ms/Krpm
+    MODH_WriteOrReadParam(6,2,0x620B,AxisMotors[1].Speed,0,NULL,MODH_CmdMutex);//设定PR1速度 rpm
+    MODH_WriteOrReadParam(6,2,0x620C,AxisMotors[1].Acc,0,NULL,MODH_CmdMutex);//设定PR1加速度 ms/Krpm
+    MODH_WriteOrReadParam(6,2,0x620D,AxisMotors[1].Dec,0,NULL,MODH_CmdMutex);//设定PR1减速度 ms/Krpm
     MODH_WriteOrReadParam(6,2,0x620E,10,0,NULL,MODH_CmdMutex);//设定PR1停顿时间ms
 
     MODH_WriteOrReadParam(6,2,0x6210,0X41,0,NULL,MODH_CmdMutex);//设定PR2模式为相对模式
     MODH_WriteOrReadParam(6,2,0x6211,GET_2BYTE_H(-Y1Interval),0,NULL,MODH_CmdMutex);//设定PR2位置高位
     MODH_WriteOrReadParam(6,2,0x6212,GET_2BYTE_L(-Y1Interval),0,NULL,MODH_CmdMutex);//设定PR2位置低位
-    MODH_WriteOrReadParam(6,2,0x6213,Y1MotoSpeed,0,NULL,MODH_CmdMutex);//设定PR2速度 rpm
-    MODH_WriteOrReadParam(6,2,0x6214,Y1MotoAcc,0,NULL,MODH_CmdMutex);//设定PR2加速度 ms/Krpm
-    MODH_WriteOrReadParam(6,2,0x6215,Y1MotoDec,0,NULL,MODH_CmdMutex);//设定PR2减速度 ms/Krpm
+    MODH_WriteOrReadParam(6,2,0x6213,AxisMotors[1].Speed,0,NULL,MODH_CmdMutex);//设定PR2速度 rpm
+    MODH_WriteOrReadParam(6,2,0x6214,AxisMotors[1].Acc,0,NULL,MODH_CmdMutex);//设定PR2加速度 ms/Krpm
+    MODH_WriteOrReadParam(6,2,0x6215,AxisMotors[1].Dec,0,NULL,MODH_CmdMutex);//设定PR2减速度 ms/Krpm
     MODH_WriteOrReadParam(6,2,0x6216,10,0,NULL,MODH_CmdMutex);//设定PR2停顿时间ms
 
     #endif
@@ -951,7 +967,7 @@ void MotoBasketCapInit()//初始化取放吊篮和开关盖路径
     MODH_WriteOrReadParam(6,3,0x6208,0X01,0,NULL,MODH_CmdMutex);//设定PR1模式为绝对模式
     MODH_WriteOrReadParam(6,3,0x6209,GET_2BYTE_H(Z1step1),0,NULL,MODH_CmdMutex);//设定PR1位置高位
     MODH_WriteOrReadParam(6,3,0x620A,GET_2BYTE_L(Z1step1),0,NULL,MODH_CmdMutex);//设定PR1位置低位
-    MODH_WriteOrReadParam(6,3,0x620B,Z1MotoSpeed,0,NULL,MODH_CmdMutex);//设定PR1速度 rpm
+    MODH_WriteOrReadParam(6,3,0x620B,AxisMotors[2].Speed,0,NULL,MODH_CmdMutex);//设定PR1速度 rpm
     MODH_WriteOrReadParam(6,3,0x620C,1000,0,NULL,MODH_CmdMutex);//设定PR1加速度 ms/Krpm
     MODH_WriteOrReadParam(6,3,0x620D,1000,0,NULL,MODH_CmdMutex);//设定PR1减速度 ms/Krpm
     MODH_WriteOrReadParam(6,3,0x620E,10,0,NULL,MODH_CmdMutex);//设定PR1停顿时间ms
@@ -959,7 +975,7 @@ void MotoBasketCapInit()//初始化取放吊篮和开关盖路径
     MODH_WriteOrReadParam(6,3,0x6210,0X01,0,NULL,MODH_CmdMutex);//设定PR2模式为绝对模式
     MODH_WriteOrReadParam(6,3,0x6211,GET_2BYTE_H(Z1stepShake),0,NULL,MODH_CmdMutex);//设定PR2位置高位
     MODH_WriteOrReadParam(6,3,0x6212,GET_2BYTE_L(Z1stepShake),0,NULL,MODH_CmdMutex);//设定PR2位置低位
-    MODH_WriteOrReadParam(6,3,0x6213,Z1MotoSpeed,0,NULL,MODH_CmdMutex);//设定PR2速度 rpm
+    MODH_WriteOrReadParam(6,3,0x6213,AxisMotors[2].Speed,0,NULL,MODH_CmdMutex);//设定PR2速度 rpm
     MODH_WriteOrReadParam(6,3,0x6214,1000,0,NULL,MODH_CmdMutex);//设定PR2加速度 ms/Krpm
     MODH_WriteOrReadParam(6,3,0x6215,1000,0,NULL,MODH_CmdMutex);//设定PR2减速度 ms/Krpm
     MODH_WriteOrReadParam(6,3,0x6216,10,0,NULL,MODH_CmdMutex);//设定PR2停顿时间ms
@@ -967,7 +983,7 @@ void MotoBasketCapInit()//初始化取放吊篮和开关盖路径
     MODH_WriteOrReadParam(6,3,0x6228,0X01,0,NULL,MODH_CmdMutex);//设定PR5模式为绝对模式
     MODH_WriteOrReadParam(6,3,0x6229,GET_2BYTE_H(Z1step2),0,NULL,MODH_CmdMutex);//设定PR5位置高位
     MODH_WriteOrReadParam(6,3,0x622A,GET_2BYTE_L(Z1step2),0,NULL,MODH_CmdMutex);//设定PR5位置低位
-    MODH_WriteOrReadParam(6,3,0x622B,Z1MotoSpeed,0,NULL,MODH_CmdMutex);//设定PR5速度 rpm
+    MODH_WriteOrReadParam(6,3,0x622B,AxisMotors[2].Speed,0,NULL,MODH_CmdMutex);//设定PR5速度 rpm
     MODH_WriteOrReadParam(6,3,0x622C,1000,0,NULL,MODH_CmdMutex);//设定PR5加速度 ms/Krpm
     MODH_WriteOrReadParam(6,3,0x622D,1000,0,NULL,MODH_CmdMutex);//设定PR5减速度 ms/Krpm
     MODH_WriteOrReadParam(6,3,0x622E,10,0,NULL,MODH_CmdMutex);//设定PR5停顿时间ms
@@ -996,18 +1012,18 @@ void MotoBasketCapInit()//初始化取放吊篮和开关盖路径
     MODH_WriteOrReadParam(6,5,0x6208,0X01,0,NULL,MODH_CmdMutex);//设定PR1模式为绝对模式
     MODH_WriteOrReadParam(6,5,0x6209,GET_2BYTE_H(Y2step2),0,NULL,MODH_CmdMutex);//设定PR1位置高位
     MODH_WriteOrReadParam(6,5,0x620A,GET_2BYTE_L(Y2step2),0,NULL,MODH_CmdMutex);//设定PR1位置低位
-    MODH_WriteOrReadParam(6,5,0x620B,Y2MotoSpeed,0,NULL,MODH_CmdMutex);//设定PR1速度 rpm
-    MODH_WriteOrReadParam(6,5,0x620C,Y2MotoAcc,0,NULL,MODH_CmdMutex);//设定PR1加速度 ms/Krpm
-    MODH_WriteOrReadParam(6,5,0x620D,Y2MotoDec,0,NULL,MODH_CmdMutex);//设定PR1减速度 ms/Krpm
+    MODH_WriteOrReadParam(6,5,0x620B,AxisMotors[5].Speed,0,NULL,MODH_CmdMutex);//设定PR1速度 rpm
+    MODH_WriteOrReadParam(6,5,0x620C,AxisMotors[5].Acc,0,NULL,MODH_CmdMutex);//设定PR1加速度 ms/Krpm
+    MODH_WriteOrReadParam(6,5,0x620D,AxisMotors[5].Dec,0,NULL,MODH_CmdMutex);//设定PR1减速度 ms/Krpm
     MODH_WriteOrReadParam(6,5,0x620E,10,0,NULL,MODH_CmdMutex);//设定PR1停顿时间ms
 
 
     MODH_WriteOrReadParam(6,5,0x6210,0X01,0,NULL,MODH_CmdMutex);//设定PR2模式为绝对模式
     MODH_WriteOrReadParam(6,5,0x6211,GET_2BYTE_H(Y2step3),0,NULL,MODH_CmdMutex);//设定PR2位置高位
     MODH_WriteOrReadParam(6,5,0x6212,GET_2BYTE_L(Y2step3),0,NULL,MODH_CmdMutex);//设定PR2位置低位
-    MODH_WriteOrReadParam(6,5,0x6213,Y2MotoSpeed,0,NULL,MODH_CmdMutex);//设定PR2速度 rpm
-    MODH_WriteOrReadParam(6,5,0x6214,Y2MotoAcc,0,NULL,MODH_CmdMutex);//设定PR2加速度 ms/Krpm
-    MODH_WriteOrReadParam(6,5,0x6215,Y2MotoDec,0,NULL,MODH_CmdMutex);//设定PR2减速度 ms/Krpm
+    MODH_WriteOrReadParam(6,5,0x6213,AxisMotors[5].Speed,0,NULL,MODH_CmdMutex);//设定PR2速度 rpm
+    MODH_WriteOrReadParam(6,5,0x6214,AxisMotors[5].Acc,0,NULL,MODH_CmdMutex);//设定PR2加速度 ms/Krpm
+    MODH_WriteOrReadParam(6,5,0x6215,AxisMotors[5].Dec,0,NULL,MODH_CmdMutex);//设定PR2减速度 ms/Krpm
     MODH_WriteOrReadParam(6,5,0x6216,10,0,NULL,MODH_CmdMutex);//设定PR2停顿时间ms
     #endif
 
@@ -1015,9 +1031,9 @@ void MotoBasketCapInit()//初始化取放吊篮和开关盖路径
     MODH_WriteOrReadParam(6,6,0x6208,0X01,0,NULL,MODH_CmdMutex);//设定PR1模式为绝对模式
     MODH_WriteOrReadParam(6,6,0x6209,GET_2BYTE_H(500),0,NULL,MODH_CmdMutex);//设定PR1位置高位,如果位置设为0会速度过快会导致过冲撞到限位，所以设定500，之后再以慢速回零
     MODH_WriteOrReadParam(6,6,0x620A,GET_2BYTE_H(500),0,NULL,MODH_CmdMutex);//设定PR1位置低位
-    MODH_WriteOrReadParam(6,6,0x620B,Z2MotoSpeed,0,NULL,MODH_CmdMutex);//设定PR1速度 rpm
-    MODH_WriteOrReadParam(6,6,0x620C,Z2MotoAcc,0,NULL,MODH_CmdMutex);//设定PR1加速度 ms/Krpm
-    MODH_WriteOrReadParam(6,6,0x620D,Z2MotoDec,0,NULL,MODH_CmdMutex);//设定PR1减速度 ms/Krpm
+    MODH_WriteOrReadParam(6,6,0x620B,AxisMotors[6].Speed,0,NULL,MODH_CmdMutex);//设定PR1速度 rpm
+    MODH_WriteOrReadParam(6,6,0x620C,AxisMotors[6].Acc,0,NULL,MODH_CmdMutex);//设定PR1加速度 ms/Krpm
+    MODH_WriteOrReadParam(6,6,0x620D,AxisMotors[6].Dec,0,NULL,MODH_CmdMutex);//设定PR1减速度 ms/Krpm
     MODH_WriteOrReadParam(6,6,0x620E,10,0,NULL,MODH_CmdMutex);//设定PR1停顿时间ms
     #endif
 }
@@ -1048,7 +1064,7 @@ void ShakeWater(u32 ShakeTime)
 *********************************************************************************************************/
 void MODH_WriteOrReadParam(uint8_t WriteOrRead, uint8_t SlaveAddr, uint16_t _reg, uint16_t _value,uint16_t _num,uint8_t *_buf,SemaphoreHandle_t SemaHandle)
 {
-    u8 delaytime=60;
+    u8 delaytime=70;
     BaseType_t xReturn = pdFALSE;
     
     xReturn = xSemaphoreTake(SemaHandle,portMAX_DELAY); /* 获取互斥信号量 */
@@ -1230,7 +1246,7 @@ void MotoInit()
       0x600F设置回零高速，0x6010设置回零低速
       0x6011设置回零加速度，0x6012设置回零减速度
     */
-   
+    #if 0
     delay_ms(3000);
     //X1电机初始化参数
     u8 buf1[26]={0x00,0x01,0xAD,0xB0,//正限位110000
@@ -1253,11 +1269,11 @@ void MotoInit()
     delay_ms(delaytime);
     MODH_WriteParam_06H(1,0x6200,0X01);//设定PR0模式为绝对模式
     delay_ms(delaytime);
-    MODH_WriteParam_06H(1,0x6203,X1MotoSpeed);//设定PR0速度rpm
+    MODH_WriteParam_06H(1,0x6203,AxisMotors[0].Speed);//设定PR0速度rpm
     delay_ms(delaytime);
-    MODH_WriteParam_06H(1,0x6204,X1MotoAcc);//设定PR0加速度 ms/Krpm
+    MODH_WriteParam_06H(1,0x6204,AxisMotors[0].Acc);//设定PR0加速度 ms/Krpm
     delay_ms(delaytime);
-    MODH_WriteParam_06H(1,0x6205,X1MotoDec);//设定PR0减速度 ms/Krpm
+    MODH_WriteParam_06H(1,0x6205,AxisMotors[0].Dec);//设定PR0减速度 ms/Krpm
     delay_ms(delaytime);
     MODH_WriteParam_06H(1,0x6206,20);//设定停顿时间ms
     delay_ms(delaytime);
@@ -1285,11 +1301,11 @@ void MotoInit()
     delay_ms(delaytime);
     MODH_WriteParam_06H(2,0x6200,0X01);//设定PR0模式为绝对模式
     delay_ms(delaytime);
-    MODH_WriteParam_06H(2,0x6203,Y1MotoSpeed);//设定PR0速度rpm
+    MODH_WriteParam_06H(2,0x6203,AxisMotors[1].Speed);//设定PR0速度rpm
     delay_ms(delaytime);
-    MODH_WriteParam_06H(2,0x6204,Y1MotoAcc);//设定PR0加速度 ms/Krpm
+    MODH_WriteParam_06H(2,0x6204,AxisMotors[1].Acc);//设定PR0加速度 ms/Krpm
     delay_ms(delaytime);
-    MODH_WriteParam_06H(2,0x6205,Y1MotoDec);//设定PR0减速度 ms/Krpm
+    MODH_WriteParam_06H(2,0x6205,AxisMotors[1].Dec);//设定PR0减速度 ms/Krpm
     delay_ms(delaytime);
     MODH_WriteParam_06H(2,0x6206,20);//设定停顿时间ms
     delay_ms(delaytime);
@@ -1325,9 +1341,9 @@ void MotoInit()
     delay_ms(delaytime);
     MODH_WriteParam_06H(3,0x6203,8);//设定PR0速度rpm
     delay_ms(delaytime);
-    MODH_WriteParam_06H(3,0x6204,Z1MotoAcc);//设定PR0加速度 ms/Krpm
+    MODH_WriteParam_06H(3,0x6204,AxisMotors[2].Acc);//设定PR0加速度 ms/Krpm
     delay_ms(delaytime);
-    MODH_WriteParam_06H(3,0x6205,Z1MotoDec);//设定PR0减速度 ms/Krpm
+    MODH_WriteParam_06H(3,0x6205,AxisMotors[2].Dec);//设定PR0减速度 ms/Krpm
     delay_ms(delaytime);
     MODH_WriteParam_06H(3,0x6206,20);//设定停顿时间ms
     delay_ms(delaytime);
@@ -1353,11 +1369,11 @@ void MotoInit()
     delay_ms(delaytime);
     MODH_WriteParam_06H(4,0x6200,0X01);//设定PR0模式为绝对模式
     delay_ms(delaytime);
-    MODH_WriteParam_06H(4,0x6203,X2MotoSpeed);//设定PR0速度rpm
+    MODH_WriteParam_06H(4,0x6203,AxisMotors[4].Speed);//设定PR0速度rpm
     delay_ms(delaytime);
-    MODH_WriteParam_06H(4,0x6204,X2MotoAcc);//设定PR0加速度 ms/Krpm
+    MODH_WriteParam_06H(4,0x6204,AxisMotors[4].Acc);//设定PR0加速度 ms/Krpm
     delay_ms(delaytime);
-    MODH_WriteParam_06H(4,0x6205,X2MotoDec);//设定PR0减速度 ms/Krpm
+    MODH_WriteParam_06H(4,0x6205,AxisMotors[4].Dec);//设定PR0减速度 ms/Krpm
     delay_ms(delaytime);
     MODH_WriteParam_06H(4,0x6206,20);//设定停顿时间ms
     delay_ms(delaytime);
@@ -1389,11 +1405,11 @@ void MotoInit()
     delay_ms(delaytime);
     MODH_WriteParam_06H(5,0x6202,0);//设定PR0位置低位
     delay_ms(delaytime);
-    MODH_WriteParam_06H(5,0x6203,Y2MotoSpeed);//设定PR0速度rpm
+    MODH_WriteParam_06H(5,0x6203,AxisMotors[5].Speed);//设定PR0速度rpm
     delay_ms(delaytime);
-    MODH_WriteParam_06H(5,0x6204,Y2MotoAcc);//设定PR0加速度 ms/Krpm
+    MODH_WriteParam_06H(5,0x6204,AxisMotors[5].Acc);//设定PR0加速度 ms/Krpm
     delay_ms(delaytime);
-    MODH_WriteParam_06H(5,0x6205,Y2MotoDec);//设定PR0减速度 ms/Krpm
+    MODH_WriteParam_06H(5,0x6205,AxisMotors[5].Dec);//设定PR0减速度 ms/Krpm
     delay_ms(delaytime);
     MODH_WriteParam_06H(5,0x6206,20);//设定停顿时间ms
     delay_ms(delaytime);
@@ -1423,11 +1439,11 @@ void MotoInit()
     delay_ms(delaytime);
     MODH_WriteParam_06H(6,0x6202,GET_2BYTE_L(90000));//设定PR0位置低位
     delay_ms(delaytime);
-    MODH_WriteParam_06H(6,0x6203,Z2MotoSpeed);//设定PR0速度rpm
+    MODH_WriteParam_06H(6,0x6203,AxisMotors[6].Speed);//设定PR0速度rpm
     delay_ms(delaytime);
-    MODH_WriteParam_06H(6,0x6204,Z2MotoAcc);//设定PR0加速度 ms/Krpm
+    MODH_WriteParam_06H(6,0x6204,AxisMotors[6].Acc);//设定PR0加速度 ms/Krpm
     delay_ms(delaytime);
-    MODH_WriteParam_06H(6,0x6205,Z2MotoDec);//设定PR0减速度 ms/Krpm
+    MODH_WriteParam_06H(6,0x6205,AxisMotors[6].Dec);//设定PR0减速度 ms/Krpm
     delay_ms(delaytime);
     MODH_WriteParam_06H(6,0x6206,20);//设定停顿时间ms
     delay_ms(delaytime);
@@ -1457,7 +1473,7 @@ void MotoInit()
     delay_ms(delaytime);
     MODH_WriteParam_06H(7,0x6202,GET_2BYTE_L(900000));//设定PR0位置低位
     delay_ms(delaytime);
-    MODH_WriteParam_06H(7,0x6203,A1MotoSpeed);//设定PR0速度rpm
+    MODH_WriteParam_06H(7,0x6203,AxisMotors[3].Speed);//设定PR0速度rpm
     delay_ms(delaytime);
     MODH_WriteParam_06H(7,0x6204,400);//设定PR0加速度 ms/Krpm
     delay_ms(delaytime);
@@ -1471,7 +1487,7 @@ void MotoInit()
     delay_ms(delaytime);
     MODH_WriteParam_06H(7,0x620A,GET_2BYTE_L(341881));//设定PR1位置低位
     delay_ms(delaytime);
-    MODH_WriteParam_06H(7,0x620B,A1MotoSpeed);//设定PR1速度rpm
+    MODH_WriteParam_06H(7,0x620B,AxisMotors[3].Speed);//设定PR1速度rpm
     delay_ms(delaytime);
     MODH_WriteParam_06H(7,0x620C,400);//设定PR1加速度 ms/Krpm
     delay_ms(delaytime);
@@ -1485,7 +1501,7 @@ void MotoInit()
     delay_ms(delaytime);
     MODH_WriteParam_06H(7,0x6212,GET_2BYTE_L(-17463));//设定PR2位置低位
     delay_ms(delaytime);
-    MODH_WriteParam_06H(7,0x6213,A1MotoSpeed);//设定PR2速度rpm
+    MODH_WriteParam_06H(7,0x6213,AxisMotors[3].Speed);//设定PR2速度rpm
     delay_ms(delaytime);
     MODH_WriteParam_06H(7,0x6214,1500);//设定PR2加速度 ms/Krpm
     delay_ms(delaytime);
@@ -1519,11 +1535,11 @@ void MotoInit()
     delay_ms(delaytime);
     MODH_WriteParam_06H(8,0x6202,GET_2BYTE_L(25000));//设定PR0位置低位
     delay_ms(delaytime);
-    MODH_WriteParam_06H(8,0x6203,A2MotoSpeed);//设定PR0速度rpm
+    MODH_WriteParam_06H(8,0x6203,AxisMotors[7].Speed);//设定PR0速度rpm
     delay_ms(delaytime);
-    MODH_WriteParam_06H(8,0x6204,A2MotoAcc);//设定PR0加速度 ms/Krpm
+    MODH_WriteParam_06H(8,0x6204,AxisMotors[7].Acc);//设定PR0加速度 ms/Krpm
     delay_ms(delaytime);
-    MODH_WriteParam_06H(8,0x6205,A2MotoDec);//设定PR0减速度 ms/Krpm
+    MODH_WriteParam_06H(8,0x6205,AxisMotors[7].Dec);//设定PR0减速度 ms/Krpm
     delay_ms(delaytime);
     MODH_WriteParam_06H(8,0x6206,20);//设定停顿时间ms
     delay_ms(delaytime);
@@ -1534,12 +1550,13 @@ void MotoInit()
     delay_ms(delaytime);
     MODH_WriteParam_06H(8,0x620A,GET_2BYTE_L(1000));//设定PR1位置低位
     delay_ms(delaytime);
-    MODH_WriteParam_06H(8,0x620B,A1MotoSpeed);//设定PR1速度rpm
+    MODH_WriteParam_06H(8,0x620B,AxisMotors[7].Speed);//设定PR1速度rpm
     delay_ms(delaytime);
-    MODH_WriteParam_06H(8,0x620C,A1MotoAcc);//设定PR1加速度 ms/Krpm
+    MODH_WriteParam_06H(8,0x620C,AxisMotors[7].Acc);//设定PR1加速度 ms/Krpm
     delay_ms(delaytime);
-    MODH_WriteParam_06H(8,0x620D,A1MotoDec);//设定PR1减速度 ms/Krpm
+    MODH_WriteParam_06H(8,0x620D,AxisMotors[7].Dec);//设定PR1减速度 ms/Krpm
     delay_ms(delaytime);
+    #endif
 
     #if 0
     MODH_WriteParam_06H(1,0x1801,0x2211);//保存参数
@@ -1586,5 +1603,27 @@ void MotoInit()
     WaitMotoStop_WithoutRTOS(6,LSMotoStatus,2);
     WaitMotoStop_WithoutRTOS(7,LSMotoStatus,2);
     WaitMotoStop_WithoutRTOS(8,LSMotoStatus,2);
+}
+u8 TankAndReagenMapping(u8 reagnum)//缸体号与试剂号映射
+{
+    u8 tanknum = 0xFF; // 默认错误标记
+    
+    if (reagnum < 6) {
+        tanknum = reagnum - 1;      // 试剂1-5 → 缸体0-4
+    } 
+    else if (reagnum <= 18) {       // 试剂6-18 → 缸体13-25
+        tanknum = reagnum + 7;  
+    } 
+    else if (reagnum <= 22) {       // 试剂19-22 → 缸体9-12
+        tanknum = reagnum - 10;  
+    } 
+    else if (reagnum <= 26) {       // 试剂23-26 → 缸体5-8
+        tanknum = reagnum - 18;  
+    } 
+    else {
+        printf("试剂号错误\r\n");
+        
+    }
+    return tanknum;
 }
 
