@@ -21,15 +21,18 @@
 #include "Moto_MotionAndUncap.h"
 #include "InputSlicDetect.h"
 #include "AT24Cxx.h"
+#include "shiyanliucheng.h"
+
 int main(void)
-{ 
+{
+     
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
 	delay_init(168);
     Uart1Init(115200);//串口1和串口屏通讯   
     Uart3Init(115200);//串口3输出到串口调试助手
 	Usart_FIFO_Init(); //串口2用于modbus通讯
     SetScreen(10);
-    //delay_ms(3000);                                                                   			                                                                                                                                                                               
+    delay_ms(5000);                                                                  			                                                                                                                                                                               
 	KEY_Init();
     Timer5_Init();
     bsp_InitHardTimer();
@@ -58,6 +61,18 @@ void start_task(void *pvParameters)
     shiyanlicuheng1Bianry=xSemaphoreCreateBinary();
     ValvePumpBianry=xSemaphoreCreateBinary();
     
+    /*******************************************/ 
+    //实验流程信号量
+    for (u8 i = 0; i < NUM_VATS; i++) 
+    {
+        xVatMutex[i] = xSemaphoreCreateMutex();//缸体互斥信号
+    }
+    TakeGetSampleMutex = xSemaphoreCreateMutex();//取放样互斥信号
+    xExpCreateMutex = xSemaphoreCreateMutex();//实验流程创建互斥信号
+    xTakeInSampleMutex = xSemaphoreCreateMutex();//取样互斥信号
+    shiyanliuchengQueue = xQueueCreate(CMD_QUEUE_SIZE, sizeof(UserCommand));
+    /*******************************************/ 
+
   	xTaskCreate((TaskFunction_t )Process_message,     	
                 (const char*    )"Process_message",   	
                 (uint16_t       )Process_message_SIZE, 
@@ -78,14 +93,14 @@ void start_task(void *pvParameters)
                 (void*          )NULL,				
                 (UBaseType_t    )LED0_TASK_PRIO,	
                 (TaskHandle_t*  )&LED0Task_Handler); 
-/*
+#if 0
     xTaskCreate((TaskFunction_t )MotoStausCheck,     	
                 (const char*    )"MotoStausCheck",   	
                 (uint16_t       )MotoStausCheck_STK_SIZE, 
                 (void*          )NULL,				
                 (UBaseType_t    )MotoStausCheck_TASK_PRIO,	
                 (TaskHandle_t*  )&MotoStausCheckTask_Handler);
-*/
+#endif
     xTaskCreate((TaskFunction_t )MonitorTasks,     	
                 (const char*    )"MonitorTasks",   	
                 (uint16_t       )MonitorTasks_STK_SIZE, 
@@ -99,14 +114,14 @@ void start_task(void *pvParameters)
                 (void*          )NULL,				
                 (UBaseType_t    )InputOutSlic_TASK_PRIO,	
                 (TaskHandle_t*  )&InputOutSlic_Handler);
-
+/*
     xTaskCreate((TaskFunction_t )shiyanlicuheng1,     	
                 (const char*    )"shiyanlicuheng1",   	
                 (uint16_t       )shiyanlicuheng1_STK_SIZE, 
                 (void*          )NULL,				
                 (UBaseType_t    )shiyanlicuheng1_TASK_PRIO,	
                 (TaskHandle_t*  )&shiyanlicuheng1_Handler);
-
+*/
     xTaskCreate((TaskFunction_t )TempControl,     	
                 (const char*    )"TempControl",   	
                 (uint16_t       )TempControl_STK_SIZE, 
@@ -120,6 +135,20 @@ void start_task(void *pvParameters)
                 (void*          )NULL,				
                 (UBaseType_t    )ValvePump_TASK_PRIO,	
                 (TaskHandle_t*  )&ValvePump_Handler);
+
+    xTaskCreate((TaskFunction_t )CheckAndStartSYliuchengTask,
+                (const char*    )"CASSYCmdTask", 
+                (uint16_t       )200, 
+                (void*          )NULL, 
+                (UBaseType_t    )PRIO_LOWEST, 
+                (TaskHandle_t*  )&CheckSYliuchengTask_Handler);
+
+    xTaskCreate((TaskFunction_t )CheckAndStartSYliuchengTask,
+                (const char*    )"CASSYCmdTask", 
+                (uint16_t       )200, 
+                (void*          )NULL, 
+                (UBaseType_t    )PRIO_LOWEST, 
+                (TaskHandle_t*  )&CheckSYliuchengTask_Handler);
     Him_Init();
     SetScreen(2);
     vTaskDelete(StartTask_Handler); //删除开始任务
@@ -165,6 +194,7 @@ void led0_task(void *pvParameters)
     }
 }
 
+//查询状态的任务优先级要比其他任务低，确保不抢占共享资源，因为查询指令使用modbus总线，电机运动也使用modbus总线，如果查询状态的任务优先级高会导致电机运动变慢迟缓
 void MotoStausCheck(void *pvParameters)
 {
     u8 str[20];
@@ -172,7 +202,7 @@ void MotoStausCheck(void *pvParameters)
     TickType_t xLastTime, xLastTime1;
     while(1)
     {
-        
+        /*
         MODH_WriteOrReadParam(3,1,LSMotoLocation,0,2,NULL,MODH_CmdMutex);//查询X1的绝对位置
         MODH_WriteOrReadParam(3,2,LSMotoLocation,0,2,NULL,MODH_CmdMutex);//查询Y1的绝对位置
         MODH_WriteOrReadParam(3,3,LSMotoLocation,0,2,NULL,MODH_CmdMutex);//查询Z1的绝对位置
@@ -185,30 +215,33 @@ void MotoStausCheck(void *pvParameters)
         MODH_WriteOrReadParam(3,4,LSMotoStatus,0,2,NULL,MODH_CmdMutex);//查询X2的运行状态
         MODH_WriteOrReadParam(3,5,LSMotoStatus,0,2,NULL,MODH_CmdMutex);//查询Y2的运行状态
         MODH_WriteOrReadParam(3,6,LSMotoStatus,0,2,NULL,MODH_CmdMutex);//查询Z2的运行状态
-
+        delay_ms(3000);
+        
 
         // 将MotoLocation数组中的值转换为字符串，并设置到界面上
         sprintf(str,"%d",MotoLocation[0]);
-        SetTextValue(8,37,str);
-        SetTextValue(9,37,str);
+        SetTextValue(6,37,str);
+        SetTextValue(7,37,str);
         sprintf(str,"%d",MotoLocation[1]);
-        SetTextValue(8,38,str);
-        SetTextValue(9,38,str);
+        SetTextValue(6,38,str);
+        SetTextValue(7,38,str);
         sprintf(str,"%d",MotoLocation[2]);
-        SetTextValue(8,39,str);
-        SetTextValue(9,39,str);
+        SetTextValue(6,39,str);
+        SetTextValue(7,39,str);
         sprintf(str,"%d",MotoLocation[3]);
-        SetTextValue(8,76,str);
-        SetTextValue(9,76,str);
+        SetTextValue(6,76,str);
+        SetTextValue(7,76,str);
         sprintf(str,"%d",MotoLocation[4]);
-        SetTextValue(8,77,str);
-        SetTextValue(9,77,str);
+        SetTextValue(6,77,str);
+        SetTextValue(7,77,str);
         sprintf(str,"%d",MotoLocation[5]);
-        SetTextValue(8,78,str);
-        SetTextValue(9,78,str);
-        delay_ms(3000);
-        if (xTaskGetTickCount() - xLastTime1 > pdMS_TO_TICKS(5000)) 
+        SetTextValue(6,78,str);
+        SetTextValue(7,78,str);
+        */
+        
+        if (xTaskGetTickCount() - xLastTime > pdMS_TO_TICKS(3000)) 
         {
+            /*
             delay_ms(500);
             MODH_WriteOrReadParam(3,12,0x15,0,1,NULL,MODH_CmdMutex);//查询1号探头温度
             delay_ms(500);
@@ -216,22 +249,25 @@ void MotoStausCheck(void *pvParameters)
             delay_ms(500);
             MODH_WriteOrReadParam(3,12,0x17,0,1,NULL,MODH_CmdMutex);//查询3号探头温度
             delay_ms(500);
+            MODH_WriteOrReadParam(3,12,0x18,0,1,NULL,MODH_CmdMutex);//查询4号探头温度
+            delay_ms(500);
             sprintf(str,"%.1f",uhwg_RealTemp[0]/10.0);
-            SetTextValue(10,9,str);
+            SetTextValue(8,9,str);
             printf("1号温控的实时温度为：%d\r\n",uhwg_RealTemp[0]);
             sprintf(str,"%.1f",uhwg_RealTemp[1]/10.0);
-            SetTextValue(10,17,str);
+            SetTextValue(8,17,str);
             printf("2号温控的实时温度为：%d\r\n",uhwg_RealTemp[1]);
             sprintf(str,"%.1f",uhwg_RealTemp[2]/10.0);
-            SetTextValue(10,28,str);
+            SetTextValue(8,28,str);
             printf("3号温控的实时温度为：%d\r\n",uhwg_RealTemp[2]);
-            xLastTime1 = xTaskGetTickCount();
-        } 
-  
-        if (xTaskGetTickCount() - xLastTime > pdMS_TO_TICKS(20000)) {  // 每20秒执行一次  
+            sprintf(str,"%.1f",uhwg_RealTemp[3]/10.0);
+            SetTextValue(8,81,str);
+            printf("3号温控的实时温度为：%d\r\n",uhwg_RealTemp[3]);
+            */
+            printf("Free heap: %d bytes\n", xPortGetFreeHeapSize());
             char pcBuffer[1000];  
             vTaskList(pcBuffer);  // 生成任务状态表格
-            printf("任务状态:\n%s\n", pcBuffer);  
+            printf("任务状态:\n%s\r\n", pcBuffer);  
             xLastTime = xTaskGetTickCount();  
         } 
     }
@@ -372,7 +408,7 @@ void InputOutSlic(void *pvParameters)
 
 void shiyanlicuheng1(void *pvParameters)//实验流程1
 {
-    u8 fanyingTime;//试剂反应时间
+    u16 fanyingTime;//试剂反应时间
     while(1)
     {
         if (xSemaphoreTake(shiyanlicuheng1Bianry,portMAX_DELAY) == pdTRUE)

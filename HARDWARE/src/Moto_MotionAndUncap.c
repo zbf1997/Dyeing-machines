@@ -379,7 +379,7 @@ void UpDownBasket(u8 Dir,u8 StainingNumber,u8 ShakeWaterFlag,u16 millisecond)
         {
             WaitMotoStop(1,LSMotoStatus,2);//等待X1轴完成
             WaitMotoStop(2,LSMotoStatus,2);//等待Y1轴完成
-            WaitMotoStop(3,LSMotoStatus,2);//等待Z1轴完成
+            //WaitMotoStop(3,LSMotoStatus,2);//等待Z1轴完成
         }
         MODH_WriteOrReadParam(6,3,0x6002,0x10,0,NULL,MODH_CmdMutex);  //立即运行PR0
         WaitMotoStop(3,LSMotoStatus,2);//等待Z轴完成
@@ -389,6 +389,10 @@ void UpDownBasket(u8 Dir,u8 StainingNumber,u8 ShakeWaterFlag,u16 millisecond)
         /*钩住吊篮*/
         MODH_WriteOrReadParam(6,2,0x6002,0x11,0,NULL,MODH_CmdMutex);  //立即运行PR1
         WaitMotoStop(2,LSMotoStatus,2);//等待Y轴完成
+
+        //升起吊篮至抖水位置
+        MODH_WriteOrReadParam(6,3,0x6002,0x12,0,NULL,MODH_CmdMutex);  //立即运行PR2
+        WaitMotoStop(3,LSMotoStatus,2);//等待Z轴完成
 
         if (ShakeWaterFlag==1) //是否开启抖水
         {
@@ -462,10 +466,10 @@ void UpDownCap(u8 Dir,u8 StainingNumber)
 
         /*Z2升起将盖子开口角度顶至垂直*/
         MODH_WriteOrReadParam(6,6,0x6002,0x10,0,NULL,MODH_CmdMutex);  //立即运行PR0
-        WaitMotoStop(6,LSMotoStatus,2);//等待Z2轴完成
+        //WaitMotoStop(6,LSMotoStatus,2);//等待Z2轴完成
 
         /*X2往后移动一小段，防止开盖时盖子角度小于90°*/
-        MODH_WriteOrReadParam(6,4,0x6002,0x12,0,NULL,MODH_CmdMutex);  //立即运行PR2
+        MODH_WriteOrReadParam(6,4,0x6002,0x13,0,NULL,MODH_CmdMutex);  //立即运行PR3
         WaitMotoStop(4,LSMotoStatus,2);//等待X2轴完成
         }
         if(StainingNumber<13)//前后排染色仓开盖方向不一样，X2往前移动的小短距离方向相反
@@ -482,10 +486,10 @@ void UpDownCap(u8 Dir,u8 StainingNumber)
 
         /*Z2升起将盖子开口角度顶至垂直*/
         MODH_WriteOrReadParam(6,6,0x6002,0x10,0,NULL,MODH_CmdMutex);  //立即运行PR0
-        WaitMotoStop(6,LSMotoStatus,2);//等待Z2轴完成
+        //WaitMotoStop(6,LSMotoStatus,2);//等待Z2轴完成
 
         /*X2往前移动一小段，防止开盖时盖子角度小于90°*/
-        MODH_WriteOrReadParam(6,4,0x6002,0x11,0,NULL,MODH_CmdMutex);  //立即运行PR1
+        MODH_WriteOrReadParam(6,4,0x6002,0x14,0,NULL,MODH_CmdMutex);  //立即运行PR4
         WaitMotoStop(4,LSMotoStatus,2);//等待X2轴完成
         }
     }
@@ -495,7 +499,7 @@ void UpDownCap(u8 Dir,u8 StainingNumber)
         {
         /*X2往前移动一小段，防止Z2下降的时候盖子角度超过90°*/
         MODH_WriteOrReadParam(6,4,0x6002,0x11,0,NULL,MODH_CmdMutex);  //立即运行PR1
-        WaitMotoStop(4,LSMotoStatus,2);//等待X2轴完成
+        //WaitMotoStop(4,LSMotoStatus,2);//等待X2轴完成
         
         /*Z2回零，下降到最低*/
         MODH_WriteOrReadParam(6,6,0x6002,0x11,0,NULL,MODH_CmdMutex);  //立即运行PR1运行到500的位置再回零
@@ -511,7 +515,7 @@ void UpDownCap(u8 Dir,u8 StainingNumber)
         {
         /*X2往后移动一小段，防止开盖时盖子角度小于90°*/
         MODH_WriteOrReadParam(6,4,0x6002,0x12,0,NULL,MODH_CmdMutex);  //立即运行PR2
-        WaitMotoStop(4,LSMotoStatus,2);//等待X2轴完成
+        //WaitMotoStop(4,LSMotoStatus,2);//等待X2轴完成
         
         /*Z2回零，下降到最低*/
         MODH_WriteOrReadParam(6,6,0x6002,0x11,0,NULL,MODH_CmdMutex);  //立即运行PR1运行到500的位置再回零
@@ -561,11 +565,15 @@ void TakeGetSample(u8 Dir,u8 StainingNumber,u8 ShakeWaterFlag,u16 millisecond)
 }
 void TakeGetSampleNoCloseCap(u8 Dir,u8 StainingNumber,u8 ShakeWaterFlag,u16 millisecond)//不关盖放样取样
 {
-    
+    //MotoShakeWaterInit(ZstepShakeinterval,Z1ShakeSpeed,Z1ShakeAcc,Z1ShakeDec);
     if(Dir==1)
     {
         if(StainingPodStatus[StainingNumber]==1)//仓内有样品，可以取出
         {
+            //升起吊篮至抖水位置
+            MODH_WriteOrReadParam(6,3,0x6002,0x12,0,NULL,MODH_CmdMutex);  //立即运行PR2
+            WaitMotoStop(3,LSMotoStatus,2);//等待Z轴完成
+
             if (ShakeWaterFlag==1) //是否开启抖水
             {
                 ShakeWater(millisecond);//抖毫秒
@@ -606,6 +614,7 @@ void TakeGetSampleNoCloseCap(u8 Dir,u8 StainingNumber,u8 ShakeWaterFlag,u16 mill
             StainingPodStatus[StainingNumber]=1;                           
         }
     }
+    
 }
 /**********************************************************************************************************
 *	函 数 名: WaitMotoStop
@@ -731,7 +740,7 @@ void WaitMotoStop(u8 SlaveAddress,u16 reg,u16 num)
         //Now_Time=millis();
         if(xTaskGetTickCount()-start_time>=Moto_OverTime)
         {
-            printf("等待超时\r\n");
+            printf("等待从机%d超时\r\n",SlaveAddress);
         }
     }
 }
@@ -915,7 +924,7 @@ void MotoShakeWaterInit(u16 ZstepShakeinterval,u16 Z1ShakeSpeed,u16 Z1ShakeAcc,u
     //PR3运行完成后自动跳转至PR4,PR4运行完成后自动跳转至PR3,循环运动直到急停
     u16 Z1ShakeStop=10;//两段运动之间的停顿时间
 
-    MODH_WriteOrReadParam(6,3,0x6218,0X4441,0,NULL,MODH_CmdMutex);//设定PR3模式为相对模式，运行完成后自动跳转至PR4
+    MODH_WriteOrReadParam(6,3,0x6218,0X4451,0,NULL,MODH_CmdMutex);//设定PR3模式为相对模式，运行完成后自动跳转至PR4
     MODH_WriteOrReadParam(6,3,0x6219,GET_2BYTE_H(-ZstepShakeinterval),0,NULL,MODH_CmdMutex);//设定PR3位置高位
     MODH_WriteOrReadParam(6,3,0x621A,GET_2BYTE_L(-ZstepShakeinterval),0,NULL,MODH_CmdMutex);//设定PR3位置低位
     MODH_WriteOrReadParam(6,3,0x621B,Z1ShakeSpeed,0,NULL,MODH_CmdMutex);//设定PR3速度 rpm
@@ -923,26 +932,43 @@ void MotoShakeWaterInit(u16 ZstepShakeinterval,u16 Z1ShakeSpeed,u16 Z1ShakeAcc,u
     MODH_WriteOrReadParam(6,3,0x621D,Z1ShakeDec,0,NULL,MODH_CmdMutex);//设定PR3减速度 ms/Krpm
     MODH_WriteOrReadParam(6,3,0x621E,Z1ShakeStop,0,NULL,MODH_CmdMutex);//设定PR3停顿时间ms
 
-    MODH_WriteOrReadParam(6,3,0x6220,0X4341,0,NULL,MODH_CmdMutex);//设定PR4模式为相对模式,运行完成后自动跳转至PR3
+    MODH_WriteOrReadParam(6,3,0x6220,0X4351,0,NULL,MODH_CmdMutex);//设定PR4模式为相对模式,运行完成后自动跳转至PR3
     MODH_WriteOrReadParam(6,3,0x6221,GET_2BYTE_H(ZstepShakeinterval),0,NULL,MODH_CmdMutex);//设定PR4位置高位
     MODH_WriteOrReadParam(6,3,0x6222,GET_2BYTE_L(ZstepShakeinterval),0,NULL,MODH_CmdMutex);//设定PR4位置低位
     MODH_WriteOrReadParam(6,3,0x6223,Z1ShakeSpeed,0,NULL,MODH_CmdMutex);//设定PR4速度 rpm
-    MODH_WriteOrReadParam(6,3,0x6224,Z1ShakeDec,0,NULL,MODH_CmdMutex);//设定PR4加速度 ms/Krpm
-    MODH_WriteOrReadParam(6,3,0x6225,Z1ShakeAcc,0,NULL,MODH_CmdMutex);//设定PR4减速度 ms/Krpm
+    MODH_WriteOrReadParam(6,3,0x6224,Z1ShakeAcc,0,NULL,MODH_CmdMutex);//设定PR4加速度 ms/Krpm
+    MODH_WriteOrReadParam(6,3,0x6225,Z1ShakeDec,0,NULL,MODH_CmdMutex);//设定PR4减速度 ms/Krpm
     MODH_WriteOrReadParam(6,3,0x6226,Z1ShakeStop,0,NULL,MODH_CmdMutex);//设定PR4停顿时间ms
+
+    MODH_WriteOrReadParam(6,3,0x6230,0X4751,0,NULL,MODH_CmdMutex);//设定PR6模式为相对模式,运行完成后自动跳转至PR7
+    MODH_WriteOrReadParam(6,3,0x6231,GET_2BYTE_H(-2*ZstepShakeinterval),0,NULL,MODH_CmdMutex);
+    MODH_WriteOrReadParam(6,3,0x6232,GET_2BYTE_L(-2*ZstepShakeinterval),0,NULL,MODH_CmdMutex);
+    MODH_WriteOrReadParam(6,3,0x6233,(Z1ShakeSpeed/2),0,NULL,MODH_CmdMutex);
+    MODH_WriteOrReadParam(6,3,0x6234,Z1ShakeAcc,0,NULL,MODH_CmdMutex);
+    MODH_WriteOrReadParam(6,3,0x6235,Z1ShakeDec,0,NULL,MODH_CmdMutex);
+    MODH_WriteOrReadParam(6,3,0x6236,Z1ShakeStop,0,NULL,MODH_CmdMutex);
+
+    MODH_WriteOrReadParam(6,3,0x6238,0X4651,0,NULL,MODH_CmdMutex);//设定PR7模式为相对模式,运行完成后自动跳转至PR6
+    MODH_WriteOrReadParam(6,3,0x6239,GET_2BYTE_H(2*ZstepShakeinterval),0,NULL,MODH_CmdMutex);
+    MODH_WriteOrReadParam(6,3,0x623A,GET_2BYTE_L(2*ZstepShakeinterval),0,NULL,MODH_CmdMutex);
+    MODH_WriteOrReadParam(6,3,0x623B,(Z1ShakeSpeed/2),0,NULL,MODH_CmdMutex);
+    MODH_WriteOrReadParam(6,3,0x623C,Z1ShakeAcc,0,NULL,MODH_CmdMutex);
+    MODH_WriteOrReadParam(6,3,0x623D,Z1ShakeDec,0,NULL,MODH_CmdMutex);
+    MODH_WriteOrReadParam(6,3,0x623E,Z1ShakeStop,0,NULL,MODH_CmdMutex);
 }
 void MotoBasketCapInit()//初始化取放吊篮和开关盖路径
 {
-    int32 Z1step1=3530;//吊篮降下时的绝对位置，Z2轴正限位3500，为了防止中途掉步，设置大一点使电机能完全到达正限位位置
+    int32 Z1step1=3500;//吊篮降下时的绝对位置，Z2轴正限位3500，为了防止中途掉步，设置大一点使电机能完全到达正限位位置
     int32 Z1step2=100;//吊篮升起时停止的绝对位置
-    int32 Z1stepShake=1500;//取吊篮升起然后开始抖动沥水的位置
+    int32 Z1stepShake=2100;//取吊篮升起然后开始抖动沥水的位置
     int32 Y1Interval=1100;//Y2轴取蓝和放蓝时脱钩的距离
     int32 Z2step1=90000;//开盖时Z2第一步上升的距离
     int32 Y2step1=0;//当仓体序号>=13时，也就是后排染色缸开盖时Y2第一步的距离
     int32 Y2step2=7900;//当仓体序号<13时，也就是前排染色缸开盖时Y2第一步的距离
     int32 Y2step3=3500;//当仓体序号<13时，也就是前排染色缸开盖时Y2第二步的距离
     int32 X2Interval=2200;//X2开关盖时移动的小段距离，防止Z2下降时开盖角度大于90°
-    u8 X2Intervalspeed=50;//X2开关盖时移动的小段距离的速度
+    u8 X2Intervalspeed=50;//X2关盖时移动的小段距离的速度
+    u8 X2Intervalspeed1=15;//X2开盖时移动的小段距离的速度
 
     #if 1//Y1路径配置
     MODH_WriteOrReadParam(6,2,0x6208,0X41,0,NULL,MODH_CmdMutex);//设定PR1模式为相对模式
@@ -969,23 +995,23 @@ void MotoBasketCapInit()//初始化取放吊篮和开关盖路径
     MODH_WriteOrReadParam(6,3,0x620A,GET_2BYTE_L(Z1step1),0,NULL,MODH_CmdMutex);//设定PR1位置低位
     MODH_WriteOrReadParam(6,3,0x620B,AxisMotors[2].Speed,0,NULL,MODH_CmdMutex);//设定PR1速度 rpm
     MODH_WriteOrReadParam(6,3,0x620C,1000,0,NULL,MODH_CmdMutex);//设定PR1加速度 ms/Krpm
-    MODH_WriteOrReadParam(6,3,0x620D,1000,0,NULL,MODH_CmdMutex);//设定PR1减速度 ms/Krpm
+    MODH_WriteOrReadParam(6,3,0x620D,3000,0,NULL,MODH_CmdMutex);//设定PR1减速度 ms/Krpm
     MODH_WriteOrReadParam(6,3,0x620E,10,0,NULL,MODH_CmdMutex);//设定PR1停顿时间ms
 
     MODH_WriteOrReadParam(6,3,0x6210,0X01,0,NULL,MODH_CmdMutex);//设定PR2模式为绝对模式
     MODH_WriteOrReadParam(6,3,0x6211,GET_2BYTE_H(Z1stepShake),0,NULL,MODH_CmdMutex);//设定PR2位置高位
     MODH_WriteOrReadParam(6,3,0x6212,GET_2BYTE_L(Z1stepShake),0,NULL,MODH_CmdMutex);//设定PR2位置低位
-    MODH_WriteOrReadParam(6,3,0x6213,AxisMotors[2].Speed,0,NULL,MODH_CmdMutex);//设定PR2速度 rpm
+    MODH_WriteOrReadParam(6,3,0x6213,20,0,NULL,MODH_CmdMutex);//设定PR2速度 rpm
     MODH_WriteOrReadParam(6,3,0x6214,1000,0,NULL,MODH_CmdMutex);//设定PR2加速度 ms/Krpm
     MODH_WriteOrReadParam(6,3,0x6215,1000,0,NULL,MODH_CmdMutex);//设定PR2减速度 ms/Krpm
     MODH_WriteOrReadParam(6,3,0x6216,10,0,NULL,MODH_CmdMutex);//设定PR2停顿时间ms
 
-    MODH_WriteOrReadParam(6,3,0x6228,0X01,0,NULL,MODH_CmdMutex);//设定PR5模式为绝对模式
+    MODH_WriteOrReadParam(6,3,0x6228,0X11,0,NULL,MODH_CmdMutex);//设定PR5模式为绝对模式可插断
     MODH_WriteOrReadParam(6,3,0x6229,GET_2BYTE_H(Z1step2),0,NULL,MODH_CmdMutex);//设定PR5位置高位
     MODH_WriteOrReadParam(6,3,0x622A,GET_2BYTE_L(Z1step2),0,NULL,MODH_CmdMutex);//设定PR5位置低位
     MODH_WriteOrReadParam(6,3,0x622B,AxisMotors[2].Speed,0,NULL,MODH_CmdMutex);//设定PR5速度 rpm
-    MODH_WriteOrReadParam(6,3,0x622C,1000,0,NULL,MODH_CmdMutex);//设定PR5加速度 ms/Krpm
-    MODH_WriteOrReadParam(6,3,0x622D,1000,0,NULL,MODH_CmdMutex);//设定PR5减速度 ms/Krpm
+    MODH_WriteOrReadParam(6,3,0x622C,2000,0,NULL,MODH_CmdMutex);//设定PR5加速度 ms/Krpm
+    MODH_WriteOrReadParam(6,3,0x622D,2000,0,NULL,MODH_CmdMutex);//设定PR5减速度 ms/Krpm
     MODH_WriteOrReadParam(6,3,0x622E,10,0,NULL,MODH_CmdMutex);//设定PR5停顿时间ms
     #endif
 
@@ -1006,6 +1032,22 @@ void MotoBasketCapInit()//初始化取放吊篮和开关盖路径
     MODH_WriteOrReadParam(6,4,0x6214,1000,0,NULL,MODH_CmdMutex);//设定PR2加速度 ms/Krpm
     MODH_WriteOrReadParam(6,4,0x6215,1000,0,NULL,MODH_CmdMutex);//设定PR2减速度 ms/Krpm
     MODH_WriteOrReadParam(6,4,0x6216,10,0,NULL,MODH_CmdMutex);//设定PR2停顿时间ms
+    
+    MODH_WriteOrReadParam(6,4,0x6218,0X41,0,NULL,MODH_CmdMutex);//设定PR3模式为相对模式
+    MODH_WriteOrReadParam(6,4,0x6219,GET_2BYTE_H(-X2Interval),0,NULL,MODH_CmdMutex);//设定PR3位置高位
+    MODH_WriteOrReadParam(6,4,0x621A,GET_2BYTE_L(-X2Interval),0,NULL,MODH_CmdMutex);//设定PR3位置低位
+    MODH_WriteOrReadParam(6,4,0x621B,X2Intervalspeed1,0,NULL,MODH_CmdMutex);//设定PR3速度 rpm
+    MODH_WriteOrReadParam(6,4,0x621C,1000,0,NULL,MODH_CmdMutex);//设定PR3加速度 ms/Krpm
+    MODH_WriteOrReadParam(6,4,0x621D,1000,0,NULL,MODH_CmdMutex);//设定PR3减速度 ms/Krpm
+    MODH_WriteOrReadParam(6,4,0x621E,10,0,NULL,MODH_CmdMutex);//设定PR3停顿时间ms
+
+    MODH_WriteOrReadParam(6,4,0x6220,0X41,0,NULL,MODH_CmdMutex);//设定PR4模式为相对模式
+    MODH_WriteOrReadParam(6,4,0x6221,GET_2BYTE_H(X2Interval),0,NULL,MODH_CmdMutex);//设定PR4位置高位
+    MODH_WriteOrReadParam(6,4,0x6222,GET_2BYTE_L(X2Interval),0,NULL,MODH_CmdMutex);//设定PR4位置低位
+    MODH_WriteOrReadParam(6,4,0x6223,X2Intervalspeed1,0,NULL,MODH_CmdMutex);//设定PR4速度 rpm
+    MODH_WriteOrReadParam(6,4,0x6224,1000,0,NULL,MODH_CmdMutex);//设定PR4加速度 ms/Krpm
+    MODH_WriteOrReadParam(6,4,0x6225,1000,0,NULL,MODH_CmdMutex);//设定PR4减速度 ms/Krpm
+    MODH_WriteOrReadParam(6,4,0x6226,10,0,NULL,MODH_CmdMutex);//设定PR4停顿时间ms
     #endif
 
     #if 1//Y2路径配置
@@ -1041,14 +1083,21 @@ void ShakeWater(u32 ShakeTime)
 {
     //ShakeTime为抖动时间
     u8 delaytime=25;
-    //升起吊篮至抖水位置
-    MODH_WriteOrReadParam(6,3,0x6002,0x12,0,NULL,MODH_CmdMutex);  //立即运行PR2
-    WaitMotoStop(3,LSMotoStatus,2);//等待Z轴完成
 
     //开始抖动
     MODH_WriteOrReadParam(6,3,0x6002,0x13,0,NULL,MODH_CmdMutex);//立即运行PR3
-    vTaskDelay(ShakeTime/portTICK_RATE_MS);
-    MODH_WriteOrReadParam(6,3,0x6002,0x40,0,NULL,MODH_CmdMutex);//Z1急停
+    vTaskDelay((ShakeTime/2)/portTICK_RATE_MS);
+    MODH_WriteOrReadParam(6,3,0x6220,0X0351,0,NULL,MODH_CmdMutex);//设定PR4模式为相对模式,运行完成后不跳转至PR3
+    //MODH_WriteOrReadParam(6,3,0x6002,0x40,0,NULL,MODH_CmdMutex);//Z1急停
+    MODH_WriteOrReadParam(6,3,0x6002,0x16,0,NULL,MODH_CmdMutex);//立即运行PR6
+    vTaskDelay((ShakeTime/2)/portTICK_RATE_MS);//结束抖动
+    //MODH_WriteOrReadParam(6,3,0x6002,0x40,0,NULL,MODH_CmdMutex);//Z1急停
+    MODH_WriteOrReadParam(6,3,0x6238,0X0651,0,NULL,MODH_CmdMutex);//设定PR7模式为相对模式,运行完成后不跳转至PR6
+    
+    WaitMotoStop(3,LSMotoStatus,2);//等待Z轴完成
+    //抖动结束后往复运动重新设置回来
+    MODH_WriteOrReadParam(6,3,0x6238,0X4651,0,NULL,MODH_CmdMutex);//设定PR7模式为相对模式,运行完成后自动跳转至PR6
+    MODH_WriteOrReadParam(6,3,0x6220,0X4351,0,NULL,MODH_CmdMutex);//设定PR4模式为相对模式,运行完成后自动跳转至PR3
 }
 /********************************************************************************************************
 *	函 数 名: MODH_WriteOrReadSingleParam
@@ -1377,7 +1426,7 @@ void MotoInit()
     delay_ms(delaytime);
     MODH_WriteParam_06H(4,0x6206,20);//设定停顿时间ms
     delay_ms(delaytime);
-    MODH_WriteParam_06H(4,0x0173,15);//设定到位时位置误差软件消抖延时ms
+    MODH_WriteParam_06H(4,0x0173,20);//设定到位时位置误差软件消抖延时ms
     delay_ms(delaytime);
 
     //Y2电机初始化参数
@@ -1556,6 +1605,7 @@ void MotoInit()
     delay_ms(delaytime);
     MODH_WriteParam_06H(8,0x620D,AxisMotors[7].Dec);//设定PR1减速度 ms/Krpm
     delay_ms(delaytime);
+    
     #endif
 
     #if 0

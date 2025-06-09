@@ -603,7 +603,7 @@ void MODH_Poll(uint8_t SlaveAddr)
 
 	if (g_tModH.RxCount < 4)
 	{
-		printf("err:g_tModH.RxCount < 4\r\n");
+		//printf("err:g_tModH.RxCount < 4\r\n");
 		goto err_ret;
 	}
 
@@ -611,7 +611,7 @@ void MODH_Poll(uint8_t SlaveAddr)
 	crc1 = CRC16_Modbus(g_tModH.RxBuf, g_tModH.RxCount);
 	if (crc1 != 0)
 	{
-		printf("err:crc1 != 0\r\n");
+		//printf("err:crc1 != 0\r\n");
 		goto err_ret;
 	}
 	

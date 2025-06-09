@@ -47,11 +47,11 @@ u8 ucg_NewUsart2SlaveAddress,ucg_OldUsart2SlaveAddress,ucg_BaundSlaveAddressSetB
 u8 ucg_MotionPosition_flag[10];//数组的值表示哪个仓体被选中,序号表示是哪一组，软件上暂时限定支持10组任务同时运行，具体几组看硬件限制
 u8 ucg_UncapPosition_flag;
 
-u16 ZstepShakeinterval=250;
-u16 Z1ShakeSpeed=150;
-u16 Z1ShakeAcc=80;
-u16 Z1ShakeDec=250;
-u16 Z1Shaketime=3000;//抖液时间，单位ms
+u16 ZstepShakeinterval=100;
+u16 Z1ShakeSpeed=80;
+u16 Z1ShakeAcc=300;
+u16 Z1ShakeDec=300;
+u16 Z1Shaketime=4000;//抖液时间，单位ms
 
 
 int16 uhwg_MotionPosition_Offest[33][3]={
@@ -111,6 +111,15 @@ SemaphoreHandle_t InputOutSlicBianry=NULL;//输入输出玻片信号
 SemaphoreHandle_t TempControlBianry=NULL;//温度控制信号
 SemaphoreHandle_t shiyanlicuheng1Bianry=NULL;//实验流程1的开启信号
 SemaphoreHandle_t ValvePumpBianry=NULL;//泵阀启停信号
+
+/*实验流程相关的信号量*/
+SemaphoreHandle_t xVatMutex[26];        // 缸体互斥量数组
+SemaphoreHandle_t TakeGetSampleMutex;   //机械臂取放样品锁
+SemaphoreHandle_t xExpCreateMutex;      // 实验流程创建互斥量
+SemaphoreHandle_t xTakeInSampleMutex;   // 从输入仓取样互斥量
+QueueHandle_t shiyanliuchengQueue;      // 用户启动实验流程队列
+
+
 TaskHandle_t MODH_CmdMutexOwnership;//Modbus互斥量所有权记录
 
 u8 StainingPodStatus[50];//记录对应染色仓的状态，1占用 0未占用
@@ -126,7 +135,14 @@ u8 TempControlFlag;//温度控制信号，1表示开启温控，2表示关闭温控
 u8 shiyanlicuheng1Flag;//实验流程1的开启信号
 
 u16 shiyan1Param[40][2];//实验流程1的参数
-u8 kaopian[10];//kaopian[0]表示是否需要烤片，kaopian[1]表示烤片时间
-u8 ActionTime1=5;//吊臂将样品放入试剂后Z1、Z2、Y2、复位动作的时间,这部份时间要算到样品的反应时间内
-u8 ActionTime2=6;//样品与试剂反应的时间结束后，机械臂将样品从试剂取出的动作时间，这部份时间要算到样品的反应时间内
-u8 ActionTime3=1;//下发指令后机械臂的响应时间
+u16 shiyan2Param[40][2];//实验流程2的参数
+u16 shiyan3Param[40][2];//实验流程3的参数
+u8 shiyanParamChangeFlag[3];//实验流程参数更改标志
+u8 kaopian[10];//kaopian[0]表示是实验1否需要烤片，kaopian[1]表示实验1烤片时间，kaopian[2]表示是实验2否需要烤片，kaopian[3]表示实验2烤片时间，kaopian[4]表示是实验3否需要烤片，kaopian[5]表示实验3烤片时间
+const u16 ActionTime1=5000;//单位毫秒，吊臂将样品放入试剂后Z1、Z2、Y2、复位动作的时间,这部份时间要算到样品的反应时间内
+const u16 ActionTime2=4500;//单位毫秒，样品与试剂反应的时间结束后，机械臂在缸内钩住样品的动作时间，这部份时间要算到样品的反应时间内，忽略了样品钩住后上升离开水面的时间，如果机械臂上升速度太慢，这个时间不可忽略
+const u16 ActionTime3=1000;//单位毫秒，下发指令后机械臂的响应时间
+const u16 ActionTime4=3000;//单位毫秒，机械臂钩住样品后，样品从缸内到抖水位的时间，
+const u16 ActionTime5=9000;//单位毫秒，机械臂钩住样品到盖子复位的时间，这个时间需要作为程序统计的试剂反应时间的减去项，因为统计时间的截至是在TakeGetSample函数后执行，取样品时该函数的最后是盖子复位，所以需要减去这个时间
+const u16 ActionTime6=2400;//单位毫秒，现场实际计时与程序统计时间的差值，暂时不知道这个差值源自哪里，在算统计时间时要补偿进去
+u8 HYMotoStatus=0;//混匀电机状态

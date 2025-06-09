@@ -488,6 +488,11 @@
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\src\AT24Cxx.c</FilePath>
             </File>
+            <File>
+              <FileName>shiyanliucheng.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\src\shiyanliucheng.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

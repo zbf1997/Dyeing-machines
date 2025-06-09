@@ -59,7 +59,7 @@ extern TaskHandle_t StartTask_Handler;
 void start_task(void *pvParameters);
 
 //任务优先级
-#define Process_message_PRIO		5
+#define Process_message_PRIO		10
 //任务堆栈大小	
 #define Process_message_SIZE 		200  
 //任务句柄
@@ -68,7 +68,7 @@ extern TaskHandle_t Process_message_Handler;
 void Process_message(void *pvParameters);
 
 //任务优先级
-#define moto_TASK_PRIO		4
+#define moto_TASK_PRIO		5
 //任务堆栈大小	
 #define moto_STK_SIZE 		500  
 //任务句柄
@@ -89,7 +89,7 @@ void led0_task(void *pvParameters);
 //任务优先级
 #define MotoStausCheck_TASK_PRIO		2
 //任务堆栈大小	
-#define MotoStausCheck_STK_SIZE 		800  
+#define MotoStausCheck_STK_SIZE 		500  
 //任务句柄
 extern TaskHandle_t MotoStausCheckTask_Handler;
 //任务函数
@@ -114,7 +114,7 @@ extern TaskHandle_t MonitorTasks_Handler;
 void MonitorTasks(void *pvParameters);
 
 //任务优先级
-#define shiyanlicuheng1_TASK_PRIO		4
+#define shiyanlicuheng1_TASK_PRIO		5
 //任务堆栈大小	
 #define shiyanlicuheng1_STK_SIZE 		500  
 //任务句柄
@@ -187,6 +187,11 @@ extern SemaphoreHandle_t UiCmdBianry;
 extern SemaphoreHandle_t MotoMonitBianry;
 extern SemaphoreHandle_t InputOutSlicBianry,TempControlBianry,shiyanlicuheng1Bianry,ValvePumpBianry;
 extern TaskHandle_t MODH_CmdMutexOwnership;
+extern SemaphoreHandle_t xVatMutex[26];        // 缸体互斥量数组
+extern SemaphoreHandle_t TakeGetSampleMutex;   //机械臂取放样品锁
+extern SemaphoreHandle_t xExpCreateMutex;      // 实验流程创建互斥量
+extern QueueHandle_t shiyanliuchengQueue;      // 用户启动实验流程命令
+extern SemaphoreHandle_t xTakeInSampleMutex;
 extern u8 StainingPodStatus[50];
 extern u8 GetTakeSampleDir;
 extern u8 StainingNumTest;
@@ -195,9 +200,15 @@ extern volatile u8 MotoTaskFlag;//任务挂起标志位,0表示任务继续，1表示任务挂起，2
 extern u8 SlicSensor1count,SlicSensor2count,SlicSensor3count,SlicSensorCount,InputOutSlicFlag,TempControlFlag,shiyanlicuheng1Flag;
 
 extern u16 shiyan1Param[40][2];
+extern u16 shiyan2Param[40][2];//实验流程2的参数
+extern u16 shiyan3Param[40][2];
+extern u8 shiyanParamChangeFlag[3];
 extern u8 kaopian[10];//kaopian[0]表示是否需要烤片，kaopian[1]表示烤片时间
-extern u8 ActionTime1;
-extern u8 ActionTime2;
-extern u8 ActionTime3;
-
+extern const u16 ActionTime1;
+extern const u16 ActionTime2;
+extern const u16 ActionTime3;
+extern const u16 ActionTime4;
+extern const u16 ActionTime5;
+extern const u16 ActionTime6;
+extern u8 HYMotoStatus;
 #endif

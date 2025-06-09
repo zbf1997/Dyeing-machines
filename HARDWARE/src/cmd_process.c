@@ -7,6 +7,7 @@
 #include "modbus_host.h"
 #include "Moto_MotionAndUncap.h"
 #include "AT24Cxx.h"
+#include "shiyanliucheng.h"
 static int32 progress_value = 0;                                                     //进度条测试值
 static int32 test_value = 0;                                                         //测试值
 static uint8 update_en = 0;                                                          //更新标记
@@ -679,6 +680,7 @@ void NotifyButton(uint16 screen_id, uint16 control_id, uint8  state)
         {
             SetTextValue(9,81,"正在保存数据...");
             AT24CXX_Write(240,(u8*)shiyan1Param[0],160);//将shiyan1Param写入EEPROM中的240-399地址
+            AT24CXX_Write(720,kaopian,2);
             SetTextValue(9,81,"保存成功!");
             delay_ms(100);
             SetTextValue(9,81,"");
@@ -689,7 +691,8 @@ void NotifyButton(uint16 screen_id, uint16 control_id, uint8  state)
         }
         if(control_id==87)
         {
-            xSemaphoreGive(shiyanlicuheng1Bianry);
+            StartExperiment(1); // 启动实验1
+            //xSemaphoreGive(shiyanlicuheng1Bianry);
         }
         if(control_id==90)
         {
@@ -703,6 +706,54 @@ void NotifyButton(uint16 screen_id, uint16 control_id, uint8  state)
             SetScreen(2);
         }
 
+    }
+    if(screen_id==12)//实验2参数设置
+    {
+        if(control_id==111)
+        {
+            SetTextValue(12,81,"正在保存数据...");
+            AT24CXX_Write(400,(u8*)shiyan2Param[0],160);//将shiyan1Param写入EEPROM中的400-559地址
+            AT24CXX_Write(722,kaopian+2,2);
+            SetTextValue(12,81,"保存成功!");
+            delay_ms(100);
+            SetTextValue(12,81,"");
+        }
+        if(control_id==83)
+        {
+            kaopian[2]=state;//0表示不烤片，1表示烤片
+        }
+        if(control_id==87)
+        {
+            StartExperiment(2); // 启动实验2
+        }
+        if(control_id==90)
+        {
+            ucg_X3Y3Z3A3RunBtn=state;//混匀开关
+        }
+    }
+    if(screen_id==13)//实验3参数设置
+    {
+        if(control_id==111)
+        {
+            SetTextValue(13,81,"正在保存数据...");
+            AT24CXX_Write(560,(u8*)shiyan3Param[0],160);//将shiyan1Param写入EEPROM中的560-719地址
+            AT24CXX_Write(724,kaopian+4,2);
+            SetTextValue(13,81,"保存成功!");
+            delay_ms(100);
+            SetTextValue(13,81,"");
+        }
+        if(control_id==83)
+        {
+            kaopian[4]=state;//0表示不烤片，1表示烤片
+        }
+        if(control_id==87)
+        {
+            StartExperiment(3); // 启动实验3
+        }
+        if(control_id==90)
+        {
+            ucg_X3Y3Z3A3RunBtn=state;//混匀开关
+        }
     }
 }
 
@@ -1275,6 +1326,7 @@ void NotifyText(uint16 screen_id, uint16 control_id, uint8 *str)
     }
     if(screen_id==9)//实验1参数设置
     {
+        shiyanParamChangeFlag[0]=1;
         if(control_id<=80)
         {
             sscanf(str,"%d",&value2);
@@ -1299,6 +1351,66 @@ void NotifyText(uint16 screen_id, uint16 control_id, uint8 *str)
         {
             sscanf(str,"%d",&value2);
             kaopian[1]=value2;//烤片时间
+
+        }
+    }
+    if(screen_id==12)//实验2参数设置
+    {
+        shiyanParamChangeFlag[1]=1;
+        if(control_id<=80)
+        {
+            sscanf(str,"%d",&value2);
+            for (i = 0; i < 40; i++) {
+                // 每组起始 control_id = 2i + 1 和 2i + 2
+                if (control_id == 2*i + 1 || control_id == 2*i + 2) 
+                {
+                    if (control_id % 2 == 1) 
+                    { // 组内第一个（奇数）
+                        shiyan2Param[i][0] = value2;
+                    } 
+                    else 
+                    { // 组内第二个（偶数）
+                        shiyan2Param[i][1] = value2;
+                    }
+                }
+            }
+            
+        }
+        
+        if(control_id==85)
+        {
+            sscanf(str,"%d",&value2);
+            kaopian[3]=value2;//烤片时间
+
+        }
+    }
+    if(screen_id==13)//实验3参数设置
+    {
+        shiyanParamChangeFlag[2]=1;
+        if(control_id<=80)
+        {
+            sscanf(str,"%d",&value2);
+            for (i = 0; i < 40; i++) {
+                // 每组起始 control_id = 2i + 1 和 2i + 2
+                if (control_id == 2*i + 1 || control_id == 2*i + 2) 
+                {
+                    if (control_id % 2 == 1) 
+                    { // 组内第一个（奇数）
+                        shiyan3Param[i][0] = value2;
+                    } 
+                    else 
+                    { // 组内第二个（偶数）
+                        shiyan3Param[i][1] = value2;
+                    }
+                }
+            }
+            
+        }
+        
+        if(control_id==85)
+        {
+            sscanf(str,"%d",&value2);
+            kaopian[5]=value2;//烤片时间
 
         }
     }
@@ -1407,6 +1519,12 @@ void Him_Init()
     AT24CXX_Read(232,ucg_SetTempBuf,8);//四路温控设定值
     delay_ms(10);
     AT24CXX_Read(240,(u8*)shiyan1Param[0],160);//实验1参数
+    delay_ms(10);
+    AT24CXX_Read(400,(u8*)shiyan2Param[0],160);//实验2参数
+    delay_ms(10);
+    AT24CXX_Read(560,(u8*)shiyan3Param[0],160);//实验3参数
+    delay_ms(10);
+    AT24CXX_Read(720,kaopian,10);//烤片参数
     for(i=0;i<12;i++)
     {
         AxisMotors[i].MaxStep=PTR2U32(AxisMotors[i].MotoModBuf+0);
@@ -1502,20 +1620,47 @@ void Him_Init()
         sprintf(str,"%d",AxisMotors[index].ResetOffest);
         SetTextValue(6,j+6,str);
     }
-    for(i=0;i<40;i++)//将实验1流程参数显示到界面
+    for(i=0;i<40;i++)//将实验1、2、3流程参数显示到界面
     {
         for(j=0;j<2;j++)
         {
-            sprintf(str,"%d",shiyan1Param[i][j]);
+            sprintf(str,"%d",shiyan1Param[i][j]);//实验1参数
             if(j==0)
             SetTextValue(9,2*i+1,str);// 组内第一个（奇数）试剂号
             else 
             SetTextValue(9,2*i+2,str);// 组内第二个（偶数）时间
+
+            sprintf(str,"%d",shiyan2Param[i][j]);//实验2参数
+            if(j==0)
+            SetTextValue(12,2*i+1,str);// 组内第一个（奇数）试剂号
+            else 
+            SetTextValue(12,2*i+2,str);// 组内第二个（偶数）时间
+
+            sprintf(str,"%d",shiyan3Param[i][j]);//实验3参数
+            if(j==0)
+            SetTextValue(13,2*i+1,str);// 组内第一个（奇数）试剂号
+            else 
+            SetTextValue(13,2*i+2,str);// 组内第二个（偶数）时间
         }
     }
     
+    //设置预设温度
     SetTextFloat(8,8,uhwg_SetTemp[0]/10.0,1,0);
     SetTextFloat(8,11,uhwg_SetTemp[1]/10.0,1,0);
     SetTextFloat(8,23,uhwg_SetTemp[2]/10.0,1,0);
     SetTextFloat(8,76,uhwg_SetTemp[3]/10.0,1,0);
+    //设置烤片参数
+    SetButtonValue(9,83,kaopian[0]);
+    sprintf(str,"%d",kaopian[1]);
+    SetTextValue(9,85,str);
+    
+    SetButtonValue(12,83,kaopian[2]);
+    sprintf(str,"%d",kaopian[3]);
+    SetTextValue(12,85,str);
+    
+    SetButtonValue(13,83,kaopian[4]);
+    sprintf(str,"%d",kaopian[5]);
+    SetTextValue(13,85,str);
+    
+    
 }
